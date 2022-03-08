@@ -2,6 +2,8 @@ package com.dvd.DTO;
 
 import java.util.Set;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.dvd.entity.ApplicationPrivilege;
 
 import lombok.Data;
@@ -13,5 +15,6 @@ import lombok.Data;
 */
 @Data
 public class ApplicationPrivilegeDTO {
+	@NotEmpty
 	private Set<ApplicationPrivilege> privileges;
 }

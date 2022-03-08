@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,16 +11,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.CreateUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
+import com.dvd.DTO.UpdateUserDTO;
 import com.dvd.entity.ApplicationPrivilege;
 import com.dvd.entity.ApplicationRole;
 import com.dvd.entity.ApplicationUser;
 import com.dvd.exception.RemovePrivilegeFromUserException;
 import com.dvd.exception.ResourceNotFoundException;
+import com.dvd.exception.SamePasswordException;
 import com.dvd.exception.SameUsernameException;
 import com.dvd.exception.UsernameTakenException;
 import com.dvd.repository.ApplicationRoleRepository;
@@ -39,11 +43,18 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	private final ApplicationUserRepository userRepository; 
 	private final ApplicationRoleRepository roleRepository;
+	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper mapper;
 	
 	@Override
-	public ApplicationUserDTO createUser(CreateUserDTO createUserDTO) {
-		ApplicationUser newUser = new ApplicationUser(createUserDTO.getUsername(), createUserDTO.getPassword(), getRolesFromIds(createUserDTO.getRolesIds()));
+	public ApplicationUserDTO createUser(CreateUserDTO createUserDTO, Principal principal) {
+		String username = createUserDTO.getUsername();
+		if (userRepository.existsByUsername(username)) {
+			throw new UsernameTakenException(username);
+		}
+		String password = passwordEncoder.encode(createUserDTO.getPassword());
+		Set<Long> rolesIds = createUserDTO.getRolesIds();
+		ApplicationUser newUser = new ApplicationUser(username, password, getRolesFromIds(rolesIds));
 		userRepository.save(newUser);
 		return mapper.map(newUser, ApplicationUserDTO.class);
 	}
@@ -80,7 +91,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	}
 
 	@Override
-	public ApplicationUserDTO updateUsername(Long id, ApplicationUserDTO userDTO) {
+	public ApplicationUserDTO updateUsername(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = getUserByIdOrElseThrow(id);
 		String newUsername = userDTO.getUsername();
 		if (newUsername != null) {
@@ -91,7 +102,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	}
 
 	@Override
-	public ApplicationUserDTO addPrivileges(Long id, ApplicationUserDTO userDTO) {
+	public ApplicationUserDTO addPrivileges(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = getUserByIdOrElseThrow(id);
 		if (userDTO.getPrivileges() != null) {
 			user.getPrivileges().addAll(userDTO.getPrivileges());
@@ -101,7 +112,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	}
 
 	@Override
-	public ApplicationUserDTO removePrivileges(Long id, ApplicationUserDTO userDTO) {
+	public ApplicationUserDTO removePrivileges(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = getUserByIdOrElseThrow(id);
 		if (userDTO.getPrivileges() != null) {
 			for (ApplicationPrivilege newPrivilege: userDTO.getPrivileges()) {
@@ -112,6 +123,39 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 				}
 			}			
 		}
+		userRepository.save(user);
+		return mapper.map(user, ApplicationUserDTO.class);
+	}
+	
+	@Override
+	public ApplicationUserDTO addRoles(Long id, UpdateUserDTO userDTO) {
+		ApplicationUser user = getUserByIdOrElseThrow(id);
+		Set<Long> rolesIds = userDTO.getRolesIds();
+		user.getRoles().addAll(getRolesFromIds(rolesIds));
+		userRepository.save(user);
+		return mapper.map(user, ApplicationUserDTO.class);
+	}
+
+	@Override
+	public ApplicationUserDTO removeRoles(Long id, UpdateUserDTO userDTO) {
+		ApplicationUser user = getUserByIdOrElseThrow(id);
+		Set<Long> rolesIds = userDTO.getRolesIds();
+		user.getRoles().removeAll(getRolesFromIds(rolesIds));
+		userRepository.save(user);
+		return mapper.map(user, ApplicationUserDTO.class);
+	}
+	
+	@Override
+	public ApplicationUserDTO changePassword(Long id, String oldPassword, String newPassword) {
+		ApplicationUser user = getUserByIdOrElseThrow(id);
+		String existingPassword = user.getPassword();
+		if (oldPassword.equals(newPassword)) {
+			throw new SamePasswordException("New password is the same as old password.");
+		}
+		if (!passwordEncoder.matches(oldPassword, existingPassword)) {
+			throw new RuntimeException("Old password doesn't match with the current password");
+		}		
+		user.setPassword(passwordEncoder.encode(newPassword));
 		userRepository.save(user);
 		return mapper.map(user, ApplicationUserDTO.class);
 	}

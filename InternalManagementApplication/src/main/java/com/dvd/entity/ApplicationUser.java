@@ -77,7 +77,7 @@ public class ApplicationUser {
 	 */
 	public Set<SimpleGrantedAuthority> getAuthorities() {
 		Set<SimpleGrantedAuthority> authorities  = new HashSet<>();
-		this.getPrivileges().stream().map(privilege -> authorities.add(new SimpleGrantedAuthority(privilege.name()))).collect(Collectors.toSet());
+		this.getRoles().stream().map(role -> authorities.addAll(role.getAuthorities())).collect(Collectors.toSet());
 		return authorities;
 	}
 	

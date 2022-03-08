@@ -1,8 +1,11 @@
 package com.dvd.service;
 
+import java.security.Principal;
+
 import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.CreateUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
+import com.dvd.DTO.UpdateUserDTO;
 
 /**
 * Defines the service interface for the User resource.
@@ -16,7 +19,7 @@ public interface ApplicationUserService {
 	 * @param newUser - DTO object specifically for creating users.
 	 * @return The new user.
 	 */
-	ApplicationUserDTO createUser(CreateUserDTO newUser);
+	ApplicationUserDTO createUser(CreateUserDTO newUser, Principal principal);
 	
 	/**
 	 * Deletes the user that matches the @param id.
@@ -53,7 +56,7 @@ public interface ApplicationUserService {
 	 * @param userDTO - DTO representation of a user with the new username.
 	 * @return The updated user.
 	 */
-	ApplicationUserDTO updateUsername(Long id, ApplicationUserDTO userDTO);
+	ApplicationUserDTO updateUsername(Long id, UpdateUserDTO userDTO);
 	
 	/**
 	 * Adds privileges to a certain user.
@@ -62,7 +65,7 @@ public interface ApplicationUserService {
 	 * @param userDTO - DTO representation of a user with the new privileges.
 	 * @return The updated user.
 	 */
-	ApplicationUserDTO addPrivileges(Long id, ApplicationUserDTO userDTO);
+	ApplicationUserDTO addPrivileges(Long id, UpdateUserDTO userDTO);
 	
 	/**
 	 * Removes privileges from a certain user.
@@ -71,5 +74,35 @@ public interface ApplicationUserService {
 	 * @param userDTO - DTO representation of a user with the privileges that will be removed.
 	 * @return The updated user.
 	 */
-	ApplicationUserDTO removePrivileges(Long id, ApplicationUserDTO userDTO);
+	ApplicationUserDTO removePrivileges(Long id, UpdateUserDTO userDTO);
+	
+	
+	/**
+	 * Change password method.
+	 * 
+	 * @param id - the id of the user.
+	 * @param oldPassword
+	 * @param newPassword
+	 * @return The updated user.
+	 */
+	ApplicationUserDTO changePassword(Long id, String oldPassword, String newPassword);
+	
+	/**
+	 * Adds role(s) to a user.
+	 * 
+	 * @param id - the id of the user
+	 * @param userDTO - DTO representation of a user with the new roles.
+	 * @return The updated user.
+	 */
+	ApplicationUserDTO addRoles(Long id, UpdateUserDTO userDTO);
+	
+	/**
+	 * Removes role(s) from a user.
+	 * 
+	 * @param id - the id of the user
+	 * @param userDTO - DTO representation of a user with the removed roles.
+	 * @return The updated user.
+	 */
+	ApplicationUserDTO removeRoles(Long id, UpdateUserDTO userDTO);
+	
 }

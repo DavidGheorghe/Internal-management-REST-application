@@ -32,9 +32,6 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 	private final ModelMapper mapper;
 	private final ApplicationRoleRepository roleRepository;
 	
-	/**
-	 *
-	 */
 	@Override
 	public ApplicationRoleDTO createRole(ApplicationRoleDTO newRoleDTO) {
 		ApplicationRole role = mapper.map(newRoleDTO, ApplicationRole.class);
@@ -117,9 +114,5 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 	private ApplicationRole getRoleOrElseThrow(Long id) {
 		return roleRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Role", "id", String.valueOf(id)));
-	}
-
-	
-	
-	
+	}	
 }

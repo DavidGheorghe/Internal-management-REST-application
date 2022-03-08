@@ -2,7 +2,12 @@ package com.dvd.controller;
 
 import static org.springframework.http.HttpStatus.OK;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.security.Principal;
+
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,33 +24,37 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.CreateUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
+import com.dvd.DTO.UpdateUserDTO;
 import com.dvd.service.ApplicationUserService;
 import com.dvd.utils.ApplicationConstants;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 /**
 * Defines the controller for the User resource.
 *
 * @author David Gheorghe
 */
+@Log4j2
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/admin/api/user")
-@PreAuthorize("hasRole('ADMIN')")
+@RequestMapping(ApplicationConstants.ADMIN_API_USER_ROOT)
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class ApplicationUserController {
 	private final ApplicationUserService userService;
-
-	@Autowired
-	public ApplicationUserController(ApplicationUserService userService) {
-		this.userService = userService;
-	}
 	
 	@PostMapping
-	public ResponseEntity<ApplicationUserDTO> createUser(@RequestBody CreateUserDTO createUserDTO) {
-		ApplicationUserDTO createdUser = userService.createUser(createUserDTO);
+	public ResponseEntity<ApplicationUserDTO> createUser(@Valid @RequestBody CreateUserDTO createUserDTO, Principal principal) {
+		ApplicationUserDTO createdUser = userService.createUser(createUserDTO, principal);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " created new user '" + createdUser.getUsername() + "'.");
+		}
 		return new ResponseEntity<ApplicationUserDTO>(createdUser, HttpStatus.CREATED);
 	}
 	
 	@GetMapping
-	public ResponseEntity<GetResourcesResponse<ApplicationUserDTO>> getAllRoles(
+	public ResponseEntity<GetResourcesResponse<ApplicationUserDTO>> getAllUsers(
 			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
@@ -54,32 +63,47 @@ public class ApplicationUserController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> getUserById(@PathVariable Long id) {
+	public ResponseEntity<ApplicationUserDTO> getUserById(@NotEmpty @Min(0) @PathVariable Long id) {
 		ApplicationUserDTO user = userService.getUserById(id);
 		return new ResponseEntity<ApplicationUserDTO>(user, HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> updateUsername(@PathVariable Long id, @RequestBody ApplicationUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> updateUsername(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.updateUsername(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
-	@PutMapping("/{id}/addPrivileges")
-	public ResponseEntity<ApplicationUserDTO> addPrivileges(@PathVariable Long id, @RequestBody ApplicationUserDTO userDTO) {
+	@PutMapping("/{id}/add-roles")
+	public ResponseEntity<ApplicationUserDTO> addRoles(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+		ApplicationUserDTO updatedUser = userService.addRoles(id, userDTO);
+		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
+	}
+	
+	@PutMapping("/{id}/remove-roles")
+	public ResponseEntity<ApplicationUserDTO> removeRoles(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+		ApplicationUserDTO updatedUser = userService.removeRoles(id, userDTO);
+		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
+	}
+	
+	@PutMapping("/{id}/add-privileges")
+	public ResponseEntity<ApplicationUserDTO> addPrivileges(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.addPrivileges(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
-	@PutMapping("/{id}/removePrivileges")
-	public ResponseEntity<ApplicationUserDTO> removePrivileges(@PathVariable Long id, @RequestBody ApplicationUserDTO userDTO) {
+	@PutMapping("/{id}/remove-privileges")
+	public ResponseEntity<ApplicationUserDTO> removePrivileges(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.removePrivileges(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> deleteUserById(@PathVariable Long id) {
+	public ResponseEntity<ApplicationUserDTO> deleteUserById(@NotEmpty @Min(0) @PathVariable Long id, Principal principal) {
 		ApplicationUserDTO deletedUser = userService.deleteUserById(id);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " deleted user '" + deletedUser.getUsername() + "'.");
+		}
 		return new ResponseEntity<ApplicationUserDTO>(deletedUser, HttpStatus.OK);
 	}
 }
