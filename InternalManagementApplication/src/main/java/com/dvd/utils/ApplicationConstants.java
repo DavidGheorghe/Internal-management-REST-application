@@ -25,4 +25,6 @@ public class ApplicationConstants {
 	public static final String ADMIN_API_ROLE_ROOT = ADMIN_API_ROOT + "role";
 	
 	public static final String API_CHANGE_PASSWORD = API_ROOT + "me/change-password";
+	
+	public static final String API_CUSTOMER_ROOT = API_ROOT + "customer";
 }
