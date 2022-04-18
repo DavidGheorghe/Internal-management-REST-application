@@ -27,4 +27,6 @@ public class ApplicationConstants {
 	public static final String API_CHANGE_PASSWORD = API_ROOT + "me/change-password";
 	
 	public static final String API_CUSTOMER_ROOT = API_ROOT + "customer";
+
+	public static final String API_COLOR_ROOT = API_ROOT + "color";
 }

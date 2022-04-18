@@ -17,6 +17,7 @@ import com.dvd.exception.CustomerCredentialTakenException;
 import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.repository.ApplicationCustomerRepository;
 import com.dvd.service.ApplicationCustomerService;
+import com.dvd.utils.UtilsMethods;
 
 import lombok.RequiredArgsConstructor;
 
@@ -97,61 +98,46 @@ public class ApplicationCustomerServiceImpl implements ApplicationCustomerServic
 	private void updateField(ApplicationCustomer customer, int fieldNo, String newValue, String oldValue) {
 		switch (fieldNo) {
 			case 1:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setFirstName(newValue);
 				}
 				break;
 			case 2:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setLastName(newValue);
 				}
 				break;
 			case 3:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue) ) {
 					customer.setEmail(newValue);
 				}
 				break;
 			case 4:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setPhoneNumber(newValue);
 				}
 				break;
 			case 5:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setCompanyName(newValue);
 				}
 				break;
 			case 6:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setCui(newValue);
 				}
 				break;
 			case 7:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setBillingAddress(newValue);
 				}
 				break;
 			case 8:
-				if (isFieldValidForUpdate(newValue, oldValue)) {
+				if (UtilsMethods.isStringFieldValidForUpdate(newValue, oldValue)) {
 					customer.setDeliveryAddress(newValue);
 				}
 				break;
 		}
-	}
-
-	/**
-	 * Checks if the new value is not null, nor blank, nor same as the old value.
-	 * 
-	 * @param newValue - the new value.
-	 * @param oldValue - the old value.
-	 * @return true if the field is valid, false otherwise.
-	 */
-	private boolean isFieldValidForUpdate(String newValue, String oldValue) {
-		boolean isValid = false;
-		if (newValue != null && !newValue.isBlank() && !newValue.equals(oldValue)) {
-			isValid = true;
-		}
-		return isValid;
 	}
 
 	/**

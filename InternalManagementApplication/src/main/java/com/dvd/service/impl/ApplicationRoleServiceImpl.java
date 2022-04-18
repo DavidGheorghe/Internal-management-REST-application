@@ -21,7 +21,7 @@ import com.dvd.service.ApplicationRoleService;
 import lombok.RequiredArgsConstructor;
 
 /**
-* Defines the implementation of the service interface.
+* Defines the implementation of the service layer for Role resource.
 *
 * @author David Gheorghe
 */

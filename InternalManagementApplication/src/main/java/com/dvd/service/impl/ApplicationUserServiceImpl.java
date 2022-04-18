@@ -33,7 +33,7 @@ import com.dvd.service.ApplicationUserService;
 import lombok.RequiredArgsConstructor;
 
 /**
-* Defines the implementation of the service interface.
+* Defines the implementation of the service layer for User resource.
 *
 * @author David Gheorghe
 */
@@ -160,16 +160,34 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 	
+	/**
+	 * Returns a set of roles from a set of role ids.
+	 * 
+	 * @param ids - the set of ids.
+	 * @return The set of roles corresponding with ids.
+	 */
 	private Set<ApplicationRole> getRolesFromIds(Set<Long> ids) {
 		List<ApplicationRole> roles = roleRepository.findAllById(ids);
 		return new HashSet<ApplicationRole>(roles);
 	}
 	
+	/**
+	 * Returns a user by id or throw an exception if it is not found.
+	 * 
+	 * @param id - the id of the user that must be retrieved.
+	 * @return The user with id @param id.
+	 */
 	private ApplicationUser getUserByIdOrElseThrow(Long id) {
 		return userRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
 	}
 	
+	/**
+	 * Changes the username of a specific user. If the username it istaken or if it is the same username as before an exception is thrown.
+	 * 
+	 * @param updatedUser - the user who's username is changed.
+	 * @param newUsername - the new username.
+	 */
 	private void changeUsername(ApplicationUser updatedUser, String newUsername) {
 		String currentUsername = updatedUser.getUsername();
 		if (currentUsername.equals(newUsername)) {
@@ -180,7 +198,14 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		}
 		updatedUser.setUsername(newUsername);
 	}
-	
+
+	/**
+	 * Checks if a set of roles have a specific privilege.
+	 * 
+	 * @param roles - the set of roles that is being searched in.
+	 * @param privilege - the searched privilege.
+	 * @return true if the roles contains the privilege, false otherwise.
+	 */
 	private boolean rolesContainsPrivilege(Set<ApplicationRole> roles, ApplicationPrivilege privilege) {		
 		boolean contains = false;
 		for (ApplicationRole role: roles) {

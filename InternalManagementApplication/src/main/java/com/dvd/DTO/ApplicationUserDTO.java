@@ -8,7 +8,7 @@ import com.dvd.entity.ApplicationRole;
 import lombok.Data;
 
 /**
-* Defines the DTO representation of a user.
+* Defines the DTO representation of an user.
 *
 * @author David Gheorghe
 */

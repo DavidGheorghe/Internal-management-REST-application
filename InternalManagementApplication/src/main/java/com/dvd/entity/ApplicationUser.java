@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -51,7 +52,7 @@ public class ApplicationUser {
 	@Enumerated(EnumType.STRING)
 	private Set<ApplicationPrivilege> privileges;
 	
-	@ManyToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "user_roles",
 			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
 			inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
@@ -90,7 +91,6 @@ public class ApplicationUser {
 		this.getPrivileges().add(privilege);
 	}
 	
-	
 	/**
 	 * Get the privileges from each role that the user have. Note: the user can have some privileges that the role does not have.
 	 * 
@@ -101,5 +101,4 @@ public class ApplicationUser {
 		this.getRoles().stream().map(role -> privileges.addAll(role.getPrivileges())).collect(Collectors.toSet());
 		return privileges;
 	}
-	
 }

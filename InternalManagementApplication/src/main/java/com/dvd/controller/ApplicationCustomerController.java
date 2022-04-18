@@ -1,5 +1,7 @@
 package com.dvd.controller;
 
+import java.security.Principal;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,12 +20,14 @@ import com.dvd.service.ApplicationCustomerService;
 import com.dvd.utils.ApplicationConstants;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 /**
 * Defines the controller for the Customer resource.
 *
 * @author David Gheorghe
 */
+@Log4j2
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(ApplicationConstants.API_CUSTOMER_ROOT)
@@ -31,14 +35,20 @@ public class ApplicationCustomerController {
 	private final ApplicationCustomerService customerService;
 	
 	@PostMapping()
-	public ResponseEntity<ApplicationCustomerDTO> createCustomer(@RequestBody ApplicationCustomerDTO newCustomer) {
+	public ResponseEntity<ApplicationCustomerDTO> createCustomer(@RequestBody ApplicationCustomerDTO newCustomer, Principal principal) {
 		ApplicationCustomerDTO createdCustomer = customerService.createCustomer(newCustomer);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " created new customer '" + createdCustomer.getFirstName() + " " + createdCustomer.getLastName() + "'.");
+		}
 		return new ResponseEntity<ApplicationCustomerDTO>(createdCustomer, HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApplicationCustomerDTO> deleteCustomerById(@PathVariable Long id) {
+	public ResponseEntity<ApplicationCustomerDTO> deleteCustomerById(@PathVariable Long id, Principal principal) {
 		ApplicationCustomerDTO deletedCustomer = customerService.deleteCustomerById(id);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " deleted customer '" + deletedCustomer.getFirstName() +  " " + deletedCustomer.getLastName() + "'.");
+		}
 		return new ResponseEntity<ApplicationCustomerDTO>(deletedCustomer, HttpStatus.OK);
 	}
 	
