@@ -71,13 +71,13 @@ public class ApplicationRoleController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ApplicationRoleDTO> getRoleById(@NotEmpty @Min(0) @PathVariable Long id) {
+	public ResponseEntity<ApplicationRoleDTO> getRoleById(@Min(0) @PathVariable Long id) {
 		ApplicationRoleDTO role = roleService.getRoleById(id);
 		return new ResponseEntity<ApplicationRoleDTO>(role, OK);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApplicationRoleDTO> deleteRoleById(@NotEmpty @Min(0) @PathVariable Long id, Principal principal) {
+	public ResponseEntity<ApplicationRoleDTO> deleteRoleById(@Min(0) @PathVariable Long id, Principal principal) {
 		ApplicationRoleDTO deletedRole = roleService.deleteRoleById(id);
 		if (log.isInfoEnabled()) {
 			log.info("User " + principal.getName() + " deleted role " + deletedRole.getName() + ".");
@@ -86,7 +86,7 @@ public class ApplicationRoleController {
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ApplicationRoleDTO> updateRole(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationRoleDTO roleDTO, Principal principal) {
+	public ResponseEntity<ApplicationRoleDTO> updateRole(@Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationRoleDTO roleDTO, Principal principal) {
 		ApplicationRoleDTO updatedRole = roleService.updateRole(id, roleDTO);
 		if (log.isInfoEnabled()) {
 			log.info("User " + principal.getName() + " updated '" + updatedRole.getName() + "' role. Name: " + updatedRole.getName() + ", privileges: " + getPrivilegesAsString(roleDTO.getPrivileges()));
@@ -95,19 +95,19 @@ public class ApplicationRoleController {
 	}
 	
 	@PutMapping("/{id}/addPrivileges")
-	public ResponseEntity<ApplicationRoleDTO> addPrivilegesToRole(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationPrivilegeDTO privilegeDTO, Principal principal) {
+	public ResponseEntity<ApplicationRoleDTO> addPrivilegesToRole(@Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationPrivilegeDTO privilegeDTO, Principal principal) {
 		ApplicationRoleDTO updatedRole = roleService.addPrivilegesToRole(id, privilegeDTO);
 		return new ResponseEntity<ApplicationRoleDTO>(updatedRole, OK);
 	}
 	
 	@PutMapping("/{id}/removePrivileges")
-	public ResponseEntity<ApplicationRoleDTO> removePrivilegesFromRole(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationPrivilegeDTO privilegeDTO) {
+	public ResponseEntity<ApplicationRoleDTO> removePrivilegesFromRole(@Min(0) @PathVariable Long id, @Valid @RequestBody ApplicationPrivilegeDTO privilegeDTO) {
 		ApplicationRoleDTO updatedRole = roleService.removePrivilegesFromRole(id, privilegeDTO);
 		return new ResponseEntity<ApplicationRoleDTO>(updatedRole, OK);
 	}
 	
 	@PutMapping("/{id}/removeAllPrivileges")
-	public ResponseEntity<ApplicationRoleDTO> removeAllPrivilegesFromRole(@NotEmpty @Min(0) @PathVariable Long id) {
+	public ResponseEntity<ApplicationRoleDTO> removeAllPrivilegesFromRole(@Min(0) @PathVariable Long id) {
 		ApplicationRoleDTO updatedRole = roleService.removeAllPrivilegesFromRole(id);
 		return new ResponseEntity<ApplicationRoleDTO>(updatedRole, OK);
 	}

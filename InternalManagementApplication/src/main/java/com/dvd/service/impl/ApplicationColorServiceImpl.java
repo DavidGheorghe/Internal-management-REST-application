@@ -40,7 +40,7 @@ public class ApplicationColorServiceImpl implements ApplicationColorService {
 
 	@Override
 	public ApplicationColorDTO deleteById(Long id) {
-		ApplicationColor deletedColor = getColorByIdOrElseThrow(id);
+		ApplicationColor deletedColor = UtilsMethods.getResourceByIdOrElseThrow(colorRepository, id, "Color");
 		ApplicationColorDTO deletedColorDTO = mapper.map(deletedColor, ApplicationColorDTO.class);
 		colorRepository.deleteById(id);
 		return deletedColorDTO;
@@ -63,13 +63,13 @@ public class ApplicationColorServiceImpl implements ApplicationColorService {
 
 	@Override
 	public ApplicationColorDTO getColorById(Long id) {
-		ApplicationColor color = getColorByIdOrElseThrow(id);
+		ApplicationColor color = UtilsMethods.getResourceByIdOrElseThrow(colorRepository, id, "Color");
 		return mapper.map(color, ApplicationColorDTO.class);
 	}
 
 	@Override
 	public ApplicationColorDTO updateColor(Long id, ApplicationColorDTO colorDTO) {
-		ApplicationColor updatedColor = getColorByIdOrElseThrow(id);
+		ApplicationColor updatedColor = UtilsMethods.getResourceByIdOrElseThrow(colorRepository, id, "Color"); 
 		String newColor = colorDTO.getName();
 		String oldColor = updatedColor.getName();
 		/** Update the name if necessary. */
@@ -107,17 +107,7 @@ public class ApplicationColorServiceImpl implements ApplicationColorService {
 		}
 		return newColor;
 	}
-	
-	/**
-	 * Returns a color by id or throws an exception if it is not found.
-	 * 
-	 * @param id - the id of the color that must be retrieved.
-	 * @return The color with id @param id.
-	 */
-	private ApplicationColor getColorByIdOrElseThrow(Long id) {
-		return colorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
-	}
-	
+
 	/**
 	 * Updates the pigment.
 	 * 

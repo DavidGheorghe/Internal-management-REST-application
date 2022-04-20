@@ -43,7 +43,7 @@ public class ApplicationCustomerServiceImpl implements ApplicationCustomerServic
 
 	@Override
 	public ApplicationCustomerDTO deleteCustomerById(Long id) {
-		ApplicationCustomer customer = getCustomerByIdOrElseThrow(id);
+		ApplicationCustomer customer = UtilsMethods.getResourceByIdOrElseThrow(customerRepository, id, "Customer");
 		ApplicationCustomerDTO deletedCustomer = mapper.map(customer, ApplicationCustomerDTO.class);
 		customerRepository.deleteById(id);
 		return deletedCustomer;
@@ -66,13 +66,13 @@ public class ApplicationCustomerServiceImpl implements ApplicationCustomerServic
 
 	@Override
 	public ApplicationCustomerDTO getCustomerById(Long id) {
-		ApplicationCustomer customer = getCustomerByIdOrElseThrow(id);
+		ApplicationCustomer customer = UtilsMethods.getResourceByIdOrElseThrow(customerRepository, id, "Customer");
 		return mapper.map(customer, ApplicationCustomerDTO.class);
 	}
 
 	@Override
 	public ApplicationCustomerDTO updateCustomer(Long id, ApplicationCustomerDTO customerDTO) {
-		ApplicationCustomer customer = getCustomerByIdOrElseThrow(id);
+		ApplicationCustomer customer = UtilsMethods.getResourceByIdOrElseThrow(customerRepository, id, "Customer");
 
 		updateField(customer, 1, customerDTO.getFirstName(), customer.getFirstName());
 		updateField(customer, 2, customerDTO.getLastName(), customer.getLastName());
@@ -166,15 +166,5 @@ public class ApplicationCustomerServiceImpl implements ApplicationCustomerServic
 		} else if (customerRepository.existsByCompanyName(companyName)) {
 			throw new CustomerCredentialTakenException("Company Name", companyName);
 		}
-	}
-
-	/**
-	 * Returns a customer by id or throw an exception if it is not found.
-	 * 
-	 * @param id - the id of the customer that must be retrieved.
-	 * @return The customer with id @param id.
-	 */
-	private ApplicationCustomer getCustomerByIdOrElseThrow(Long id) {
-		return customerRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
 	}
 }

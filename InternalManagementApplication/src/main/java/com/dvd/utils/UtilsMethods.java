@@ -1,5 +1,9 @@
 package com.dvd.utils;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.dvd.exception.ResourceNotFoundException;
+
 /**
 * Common methods that are used within the application.
 *
@@ -21,5 +25,9 @@ public class UtilsMethods {
 			isValid = true;
 		}
 		return isValid;
+	}
+
+	public static <T> T getResourceByIdOrElseThrow(JpaRepository<T, Long> repository, Long id, String resourceName) {
+		return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(resourceName, "id", String.valueOf(id)));
 	}
 }

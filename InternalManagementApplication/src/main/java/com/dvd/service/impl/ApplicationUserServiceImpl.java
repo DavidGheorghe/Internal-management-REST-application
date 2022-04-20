@@ -29,6 +29,7 @@ import com.dvd.exception.UsernameTakenException;
 import com.dvd.repository.ApplicationRoleRepository;
 import com.dvd.repository.ApplicationUserRepository;
 import com.dvd.service.ApplicationUserService;
+import com.dvd.utils.UtilsMethods;
 
 import lombok.RequiredArgsConstructor;
 
@@ -61,7 +62,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	@Override
 	public ApplicationUserDTO deleteUserById(Long id) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		ApplicationUserDTO deletedUser = mapper.map(user, ApplicationUserDTO.class);
 		userRepository.deleteById(id);
 		return deletedUser;
@@ -86,13 +87,13 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	@Override
 	public ApplicationUserDTO getUserById(Long id) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 
 	@Override
 	public ApplicationUserDTO updateUsername(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		String newUsername = userDTO.getUsername();
 		if (newUsername != null) {
 			this.changeUsername(user, newUsername);
@@ -103,7 +104,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	@Override
 	public ApplicationUserDTO addPrivileges(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		if (userDTO.getPrivileges() != null) {
 			user.getPrivileges().addAll(userDTO.getPrivileges());
 		}
@@ -113,7 +114,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	@Override
 	public ApplicationUserDTO removePrivileges(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		if (userDTO.getPrivileges() != null) {
 			for (ApplicationPrivilege newPrivilege: userDTO.getPrivileges()) {
 				if (rolesContainsPrivilege(user.getRoles(), newPrivilege)) {
@@ -129,7 +130,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	
 	@Override
 	public ApplicationUserDTO addRoles(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		Set<Long> rolesIds = userDTO.getRolesIds();
 		user.getRoles().addAll(getRolesFromIds(rolesIds));
 		userRepository.save(user);
@@ -138,7 +139,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	@Override
 	public ApplicationUserDTO removeRoles(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		Set<Long> rolesIds = userDTO.getRolesIds();
 		user.getRoles().removeAll(getRolesFromIds(rolesIds));
 		userRepository.save(user);
@@ -147,7 +148,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	
 	@Override
 	public ApplicationUserDTO changePassword(Long id, String oldPassword, String newPassword) {
-		ApplicationUser user = getUserByIdOrElseThrow(id);
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		String existingPassword = user.getPassword();
 		if (oldPassword.equals(newPassword)) {
 			throw new SamePasswordException("New password is the same as old password.");

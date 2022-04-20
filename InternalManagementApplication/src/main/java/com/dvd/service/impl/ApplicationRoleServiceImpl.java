@@ -17,6 +17,7 @@ import com.dvd.entity.ApplicationRole;
 import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.repository.ApplicationRoleRepository;
 import com.dvd.service.ApplicationRoleService;
+import com.dvd.utils.UtilsMethods;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,11 +42,10 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 	
 	@Override
 	public ApplicationRoleDTO getRoleById(Long id) {
-		ApplicationRole role = getRoleOrElseThrow(id);
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, id, "Role");
 		return mapper.map(role, ApplicationRoleDTO.class);
 	}
-	
-	
+
 	@Override
 	public GetResourcesResponse<ApplicationRoleDTO> getAllRoles(int pageNo, int pageSize, String sortBy,
 			String sortDir) {
@@ -64,7 +64,7 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 	
 	@Override
 	public ApplicationRoleDTO deleteRoleById(Long id) {
-		ApplicationRole role = getRoleOrElseThrow(id);
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, id, "Role");
 		ApplicationRoleDTO deletedRole = mapper.map(role, ApplicationRoleDTO.class);
 		roleRepository.deleteById(id);
 		return deletedRole;
@@ -72,7 +72,7 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 
 	@Override
 	public ApplicationRoleDTO updateRole(Long id, ApplicationRoleDTO roleDTO) {
-		ApplicationRole role = getRoleOrElseThrow(id);
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, id, "Role");
 		if (roleDTO.getName() != null && !role.getName().equals(roleDTO.getName())) {
 			role.setName(roleDTO.getName());
 		}
@@ -85,7 +85,7 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 
 	@Override
 	public ApplicationRoleDTO addPrivilegesToRole(Long roleId, ApplicationPrivilegeDTO privilegesDTO) {
-		ApplicationRole role = getRoleOrElseThrow(roleId);
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, roleId, "Role");
 		if (privilegesDTO.getPrivileges() != null) {
 			role.getPrivileges().addAll(privilegesDTO.getPrivileges());
 		}
@@ -95,7 +95,7 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 
 	@Override
 	public ApplicationRoleDTO removePrivilegesFromRole(Long roleId, ApplicationPrivilegeDTO privilegesDTO) {
-		ApplicationRole role = getRoleOrElseThrow(roleId);
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, roleId, "Role");
 		if (privilegesDTO.getPrivileges() != null) {
 			role.getPrivileges().removeAll(privilegesDTO.getPrivileges());
 		}
@@ -105,14 +105,9 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
 
 	@Override
 	public ApplicationRoleDTO removeAllPrivilegesFromRole(Long roleId) {
-		ApplicationRole role = getRoleOrElseThrow(roleId);		
+		ApplicationRole role = UtilsMethods.getResourceByIdOrElseThrow(roleRepository, roleId, "Role");
 		role.getPrivileges().clear();
 		roleRepository.save(role);
 		return mapper.map(role, ApplicationRoleDTO.class);
 	}
-	
-	private ApplicationRole getRoleOrElseThrow(Long id) {
-		return roleRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Role", "id", String.valueOf(id)));
-	}	
 }

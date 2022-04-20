@@ -63,47 +63,49 @@ public class ApplicationUserController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> getUserById(@NotEmpty @Min(0) @PathVariable Long id) {
+	public ResponseEntity<ApplicationUserDTO> getUserById(@Min(0) @PathVariable Long id) {
 		ApplicationUserDTO user = userService.getUserById(id);
 		return new ResponseEntity<ApplicationUserDTO>(user, HttpStatus.OK);
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> updateUsername(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> updateUsername(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.updateUsername(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/add-roles")
-	public ResponseEntity<ApplicationUserDTO> addRoles(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> addRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.addRoles(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/remove-roles")
-	public ResponseEntity<ApplicationUserDTO> removeRoles(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> removeRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.removeRoles(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/add-privileges")
-	public ResponseEntity<ApplicationUserDTO> addPrivileges(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> addPrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.addPrivileges(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/remove-privileges")
-	public ResponseEntity<ApplicationUserDTO> removePrivileges(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> removePrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
 		ApplicationUserDTO updatedUser = userService.removePrivileges(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> deleteUserById(@NotEmpty @Min(0) @PathVariable Long id, Principal principal) {
+	public ResponseEntity<ApplicationUserDTO> deleteUserById(@Min(0) @PathVariable Long id, Principal principal) {
 		ApplicationUserDTO deletedUser = userService.deleteUserById(id);
 		if (log.isInfoEnabled()) {
 			log.info("User " + principal.getName() + " deleted user '" + deletedUser.getUsername() + "'.");
 		}
 		return new ResponseEntity<ApplicationUserDTO>(deletedUser, HttpStatus.OK);
 	}
+	
+	// TODO: add permission to retrieve own user
 }

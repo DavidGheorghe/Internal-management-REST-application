@@ -77,8 +77,7 @@ public class ApplicationRole {
 	public void addPrivilegeToRole(ApplicationPrivilege privilege) {
 		this.privileges.add(privilege);
 	}
-	
-	
+
 	/**
 	 * Convert the privileges into authorities and return them.
 	 * 
@@ -89,8 +88,7 @@ public class ApplicationRole {
 		authorities.add(new SimpleGrantedAuthority("ROLE_" + this.getName()));
 		return authorities;
 	}
-	
-	
+
 	/**
 	 * Checks if a role instance contains a certain privilege.
 	 * 
