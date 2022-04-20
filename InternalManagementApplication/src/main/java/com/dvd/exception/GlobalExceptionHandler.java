@@ -56,6 +56,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
 	}
 	
+	@ExceptionHandler(CustomerCredentialTakenException.class)
+	public ResponseEntity<CustomExceptionDetails> handleCustomerCredentialTakenException(CustomerCredentialTakenException exception, WebRequest webRequest) {
+		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
+		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(UniqueEntryException.class)
+	public ResponseEntity<CustomExceptionDetails> handleUniqueEntryException(UniqueEntryException exception, WebRequest webRequest) {
+		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
+		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
+	}
+
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {

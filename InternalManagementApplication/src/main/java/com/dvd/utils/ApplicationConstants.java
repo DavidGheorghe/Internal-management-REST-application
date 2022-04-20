@@ -19,7 +19,6 @@ public class ApplicationConstants {
 	public static final String AUTH_LOGIN = AUTH_ROOT + "login";
 	public static final String AUTH_REFRESH_TOKEN = AUTH_ROOT + "refresh-token";
 	
-	
 	public static final String ADMIN_API_ROOT= "admin/" + API_ROOT;
 	public static final String ADMIN_API_USER_ROOT = ADMIN_API_ROOT + "user";
 	public static final String ADMIN_API_ROLE_ROOT = ADMIN_API_ROOT + "role";
@@ -29,4 +28,6 @@ public class ApplicationConstants {
 	public static final String API_CUSTOMER_ROOT = API_ROOT + "customer";
 
 	public static final String API_COLOR_ROOT = API_ROOT + "color";
+
+	public static final String API_PRODUCT_TYPE_ROOT = API_ROOT + "product-type";
 }
