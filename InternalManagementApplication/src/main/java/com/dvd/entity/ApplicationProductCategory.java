@@ -12,20 +12,20 @@ import org.springframework.lang.NonNull;
 import lombok.Data;
 
 /**
-* Defines the ProductType resource.
+* Defines the ProductCategory resource.
 *
 * @author David Gheorghe
 */
 @Data
 @Entity
-@Table(name = "ProductType", uniqueConstraints = @UniqueConstraint(columnNames = {"typeName"}))
-public class ApplicationProductType {
+@Table(name = "ProductCategory", uniqueConstraints = @UniqueConstraint(columnNames = {"categoryName"}))
+public class ApplicationProductCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@NonNull
-	private String typeName;
+	private String categoryName;
 
-	public ApplicationProductType() {
+	public ApplicationProductCategory() {
 	}
 }
