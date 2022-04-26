@@ -12,7 +12,10 @@ public class ApplicationConstants {
 	public static final String DEFAULT_SORT_DIRECTION = "asc";
 	
 	public static final String JWT_AUTHORIZATION_PREFIX = "Bearer ";
+	/** Current VAT (Value-Added Tax) */
+	public static final Double VAT = 19.0;
 	
+	/** API's URIs */
 	public static final String API_ROOT= "api/";
 	
 	public static final String AUTH_ROOT = API_ROOT + "auth/";
@@ -29,5 +32,7 @@ public class ApplicationConstants {
 
 	public static final String API_COLOR_ROOT = API_ROOT + "color";
 
-	public static final String API_PRODUCT_TYPE_ROOT = API_ROOT + "product-type";
+	public static final String API_PRODUCT_CATEGORY_ROOT = API_ROOT + "product-category";
+	
+	public static final String API_PRODUCT_ROOT = API_ROOT + "product";
 }

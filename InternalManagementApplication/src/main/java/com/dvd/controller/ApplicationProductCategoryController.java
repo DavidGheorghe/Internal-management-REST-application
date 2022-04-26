@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 * @author David Gheorghe
 */
 @RequiredArgsConstructor
-@RequestMapping(ApplicationConstants.API_PRODUCT_TYPE_ROOT)
+@RequestMapping(ApplicationConstants.API_PRODUCT_CATEGORY_ROOT)
 @RestController
 public class ApplicationProductCategoryController {
 	private final ApplicationProductCategoryService productCategoryService;
