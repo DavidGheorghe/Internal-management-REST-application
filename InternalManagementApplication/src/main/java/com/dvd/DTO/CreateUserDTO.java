@@ -23,5 +23,5 @@ public class CreateUserDTO {
 	@Length(min = 5, max = 20)
 	private String password;
 	@NotEmpty
-	private Set<Long> rolesIds;
+	private Set<Integer> rolesIds;
 }

@@ -12,22 +12,21 @@ import com.fasterxml.jackson.annotation.JsonValue;
 * @author David Gheorghe
 */
 public enum ApplicationPrivilege {
-	EMPLOYEE_READ("employee_read"),
-	EMPLOYEE_READ_OWN("employee_read_own"),
-	EMPLOYEE_WRITE("employee_write"),
-	PRODUCT_READ("product_read"),
-	PRODUCT_WRITE("product_write"),
-	ORDER_READ("order_read"),
-	ORDER_WRITE("order_write"),
-	CUSTOMER_READ("customer_read"),
-	CUSTOMER_WRITE("customer_write"),
-	USER_READ("user_read"),
-	USER_READ_OWN("user_read_own"),
-	USER_WRITE("user_write");
+	PRODUCT_READ(1, "product_read"),
+	PRODUCT_WRITE(2, "product_write"),
+	ORDER_READ(3, "order_read"),
+	ORDER_WRITE(4, "order_write"),
+	CUSTOMER_READ(5, "customer_read"),
+	CUSTOMER_WRITE(6, "customer_write"),
+	USER_READ(7, "user_read"),
+	USER_READ_OWN(8, "user_read_own"),
+	USER_WRITE(9, "user_write");
 	
+	private final Integer id;
 	private final String privilege;
 	
-	ApplicationPrivilege(String privilege) {
+	ApplicationPrivilege(Integer id, String privilege) {
+		this.id = id;
 		this.privilege = privilege;
 	}
 	
@@ -36,11 +35,15 @@ public enum ApplicationPrivilege {
 		return Stream.of(ApplicationPrivilege.values())
 				.filter(privilegeTarget -> privilegeTarget.getPrivilege().equals(privilege.toLowerCase()))
 				.findFirst()
-				.orElseThrow(() -> new ResourceNotFoundException("Privilege", "name", privilege));//.orElseThrow()
+				.orElseThrow(() -> new ResourceNotFoundException("Privilege", "name", privilege));
 	}
 	
 	@JsonValue
 	public String getPrivilege() {
 		return privilege;
+	}
+	
+	public Integer getId() {
+		return id;
 	}
 }

@@ -1,73 +1,45 @@
 package com.dvd.entity;
 
-import java.util.HashSet;
+import static com.dvd.entity.ApplicationPrivilege.ORDER_READ;
+import static com.dvd.entity.ApplicationPrivilege.PRODUCT_READ;
+import static com.dvd.entity.ApplicationPrivilege.USER_READ;
+import static com.dvd.entity.ApplicationPrivilege.USER_READ_OWN;
+import static com.dvd.entity.ApplicationPrivilege.USER_WRITE;
+
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.dvd.exception.ResourceNotFoundException;
 
 /**
 * Defines the Role resource.
 *
 * @author David Gheorghe
 */
-@Getter
-@NoArgsConstructor
-@Entity
-@Table(name = "role",
-		uniqueConstraints = @UniqueConstraint(columnNames = {"name"})
-		)
-public class ApplicationRole {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+public enum ApplicationRole {
+	EMPLOYEE(1, EnumSet.of(ORDER_READ, PRODUCT_READ, USER_READ_OWN)),
+	MANAGER(2, EnumSet.complementOf(EnumSet.of(USER_READ, USER_WRITE))),
+	ADMIN(3, EnumSet.of(USER_WRITE, USER_READ));
 	
-	@Setter
-	private String name;
 	
-	@Setter
-	@Column(name = "privilege")
-	@ElementCollection(targetClass = ApplicationPrivilege.class, fetch = FetchType.EAGER)
-	@CollectionTable(name = "role_privilege", joinColumns = @JoinColumn(name = "role_id"))
-	@Enumerated(EnumType.STRING)
-	private Set<ApplicationPrivilege> privileges;
+	private Integer id;
+	private EnumSet<ApplicationPrivilege> privileges;
 	
-	@ManyToMany(mappedBy = "roles")
-	@JsonIgnore
-	private Set<ApplicationUser> users;
-	
-	public ApplicationRole(String name) {
-		this.name = name;
-		this.privileges = new HashSet<>();
-		this.users = new HashSet<>();
+	ApplicationRole(Integer id, EnumSet<ApplicationPrivilege> privileges) {
+		this.id = id;
+		this.privileges = privileges;
 	}
 	
-	public ApplicationRole(String name, Set<ApplicationPrivilege> privileges) {
-		this.name = name;
-		this.privileges = privileges;
-		this.users = new HashSet<>();
-	}	
+	public Integer getId() {
+		return id;
+	}
+	
+	public EnumSet<ApplicationPrivilege> getPrivileges() {
+		return privileges;
+	}
 	
 	/**
 	 * Adds a privilege to a role instance.
@@ -85,7 +57,7 @@ public class ApplicationRole {
 	 */
 	public Set<SimpleGrantedAuthority> getAuthorities() {
 		Set<SimpleGrantedAuthority> authorities = this.getPrivileges().stream().map(privilege -> new SimpleGrantedAuthority(privilege.name())).collect(Collectors.toSet());
-		authorities.add(new SimpleGrantedAuthority("ROLE_" + this.getName()));
+		authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
 		return authorities;
 	}
 
@@ -97,5 +69,23 @@ public class ApplicationRole {
 	 */
 	public boolean hasPrivilege(ApplicationPrivilege privilege) {		
 		return this.getPrivileges().contains(privilege);
+	}
+	
+	public static EnumSet<ApplicationRole> getRolesFromIds(Set<Integer> rolesIds) {
+		EnumSet<ApplicationRole> roles = EnumSet.noneOf(ApplicationRole.class);
+		for (Integer roleId: rolesIds) {
+			ApplicationRole desiredRole = getRoleById(roleId);
+			roles.add(desiredRole);
+		}
+		return roles;
+	}
+	
+	public static ApplicationRole getRoleById(Integer id) {
+		for (ApplicationRole role : values()) {
+			if (role.getId() == id) {
+				return role;
+			}
+		}
+		throw new ResourceNotFoundException("Role", "id", String.valueOf(id));
 	}
 }

@@ -18,5 +18,5 @@ public class UpdateUserDTO {
 	@Length(min = 5, max = 20)
 	private String username;
 	private Set<ApplicationPrivilege> privileges;
-	private Set<Long> rolesIds;
+	private Set<Integer> rolesIds;
 }

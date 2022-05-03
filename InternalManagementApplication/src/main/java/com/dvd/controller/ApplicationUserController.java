@@ -6,7 +6,6 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,26 +74,32 @@ public class ApplicationUserController {
 	}
 	
 	@PutMapping("/{id}/add-roles")
-	public ResponseEntity<ApplicationUserDTO> addRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> addRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO, Principal principal) {
 		ApplicationUserDTO updatedUser = userService.addRoles(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/remove-roles")
-	public ResponseEntity<ApplicationUserDTO> removeRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> removeRoles(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO, Principal principal) {
 		ApplicationUserDTO updatedUser = userService.removeRoles(id, userDTO);
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/add-privileges")
-	public ResponseEntity<ApplicationUserDTO> addPrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> addPrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO, Principal principal) {
 		ApplicationUserDTO updatedUser = userService.addPrivileges(id, userDTO);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " added privileges(" + userDTO.getPrivileges() + ") to the user " + updatedUser.getUsername() + ".");
+		}
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
 	@PutMapping("/{id}/remove-privileges")
-	public ResponseEntity<ApplicationUserDTO> removePrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO) {
+	public ResponseEntity<ApplicationUserDTO> removePrivileges(@Min(0) @PathVariable Long id, @Valid @RequestBody UpdateUserDTO userDTO, Principal principal) {
 		ApplicationUserDTO updatedUser = userService.removePrivileges(id, userDTO);
+		if (log.isInfoEnabled()) {
+			log.info("User " + principal.getName() + " removed privileges(" + userDTO.getPrivileges() + ") from the user " + updatedUser.getUsername() + ".");
+		}
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	

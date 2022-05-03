@@ -1,7 +1,6 @@
 package com.dvd.service.impl;
 
 import java.security.Principal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,11 +21,9 @@ import com.dvd.entity.ApplicationPrivilege;
 import com.dvd.entity.ApplicationRole;
 import com.dvd.entity.ApplicationUser;
 import com.dvd.exception.RemovePrivilegeFromUserException;
-import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.exception.SamePasswordException;
 import com.dvd.exception.SameUsernameException;
 import com.dvd.exception.UsernameTakenException;
-import com.dvd.repository.ApplicationRoleRepository;
 import com.dvd.repository.ApplicationUserRepository;
 import com.dvd.service.ApplicationUserService;
 import com.dvd.utils.UtilsMethods;
@@ -43,7 +40,6 @@ import lombok.RequiredArgsConstructor;
 public class ApplicationUserServiceImpl implements ApplicationUserService {
 
 	private final ApplicationUserRepository userRepository; 
-	private final ApplicationRoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper mapper;
 	
@@ -54,8 +50,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 			throw new UsernameTakenException(username);
 		}
 		String password = passwordEncoder.encode(createUserDTO.getPassword());
-		Set<Long> rolesIds = createUserDTO.getRolesIds();
-		ApplicationUser newUser = new ApplicationUser(username, password, getRolesFromIds(rolesIds));
+		Set<Integer> rolesIds = createUserDTO.getRolesIds();
+		ApplicationUser newUser = new ApplicationUser(username, password, ApplicationRole.getRolesFromIds(rolesIds));
 		userRepository.save(newUser);
 		return mapper.map(newUser, ApplicationUserDTO.class);
 	}
@@ -131,17 +127,20 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	@Override
 	public ApplicationUserDTO addRoles(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
-		Set<Long> rolesIds = userDTO.getRolesIds();
-		user.getRoles().addAll(getRolesFromIds(rolesIds));
-		userRepository.save(user);
+		if (userDTO.getRolesIds() != null) {
+			Set<Integer> rolesIds = userDTO.getRolesIds();
+			user.getRoles().addAll(ApplicationRole.getRolesFromIds(rolesIds));
+			userRepository.save(user);
+		}
+		// TODO: handle case when the ids are null.
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 
 	@Override
 	public ApplicationUserDTO removeRoles(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
-		Set<Long> rolesIds = userDTO.getRolesIds();
-		user.getRoles().removeAll(getRolesFromIds(rolesIds));
+		Set<Integer> rolesIds = userDTO.getRolesIds();
+		user.getRoles().removeAll(ApplicationRole.getRolesFromIds(rolesIds));
 		userRepository.save(user);
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
@@ -160,29 +159,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		userRepository.save(user);
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
-	
-	/**
-	 * Returns a set of roles from a set of role ids.
-	 * 
-	 * @param ids - the set of ids.
-	 * @return The set of roles corresponding with ids.
-	 */
-	private Set<ApplicationRole> getRolesFromIds(Set<Long> ids) {
-		List<ApplicationRole> roles = roleRepository.findAllById(ids);
-		return new HashSet<ApplicationRole>(roles);
-	}
-	
-	/**
-	 * Returns a user by id or throw an exception if it is not found.
-	 * 
-	 * @param id - the id of the user that must be retrieved.
-	 * @return The user with id @param id.
-	 */
-	private ApplicationUser getUserByIdOrElseThrow(Long id) {
-		return userRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
-	}
-	
+		
 	/**
 	 * Changes the username of a specific user. If the username it istaken or if it is the same username as before an exception is thrown.
 	 * 

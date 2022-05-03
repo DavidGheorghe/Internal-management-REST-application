@@ -51,13 +51,11 @@ public class ApplicationUser {
 	@CollectionTable(name = "user_privilege", joinColumns = @JoinColumn(name = "user_id"))
 	@Enumerated(EnumType.STRING)
 	private Set<ApplicationPrivilege> privileges;
-	
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "user_roles",
-			joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-			inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
-			)
-	@JsonIgnore
+		
+	@Column(name = "role")
+	@ElementCollection(targetClass = ApplicationRole.class, fetch = FetchType.EAGER)
+	@CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+	@Enumerated(EnumType.STRING)
 	private Set<ApplicationRole> roles;
 	
 	public ApplicationUser(String username, String password, Set<ApplicationRole> roles) {
