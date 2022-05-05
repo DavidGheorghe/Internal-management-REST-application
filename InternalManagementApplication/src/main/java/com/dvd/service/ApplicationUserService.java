@@ -105,4 +105,11 @@ public interface ApplicationUserService {
 	 */
 	ApplicationUserDTO removeRoles(Long id, UpdateUserDTO userDTO);
 	
+	/**
+	 * Returns the current user based on the user who made the request.
+	 * 
+	 * @param username
+	 * @return
+	 */
+	ApplicationUserDTO getCurrentUser(String username);
 }

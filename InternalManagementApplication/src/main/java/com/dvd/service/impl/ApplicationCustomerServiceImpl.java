@@ -14,7 +14,6 @@ import com.dvd.DTO.ApplicationCustomerDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.entity.ApplicationCustomer;
 import com.dvd.exception.CustomerCredentialTakenException;
-import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.repository.ApplicationCustomerRepository;
 import com.dvd.service.ApplicationCustomerService;
 import com.dvd.utils.UtilsMethods;

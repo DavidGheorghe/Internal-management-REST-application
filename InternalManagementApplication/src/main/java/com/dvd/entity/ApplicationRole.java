@@ -24,7 +24,6 @@ public enum ApplicationRole {
 	MANAGER(2, EnumSet.complementOf(EnumSet.of(USER_READ, USER_WRITE))),
 	ADMIN(3, EnumSet.of(USER_WRITE, USER_READ));
 	
-	
 	private Integer id;
 	private EnumSet<ApplicationPrivilege> privileges;
 	
@@ -71,6 +70,12 @@ public enum ApplicationRole {
 		return this.getPrivileges().contains(privilege);
 	}
 	
+	/**
+	 * Returns the roles from the corresponding ids.
+	 * 
+	 * @param rolesIds - the ids.
+	 * @return An enum set with the roles.
+	 */
 	public static EnumSet<ApplicationRole> getRolesFromIds(Set<Integer> rolesIds) {
 		EnumSet<ApplicationRole> roles = EnumSet.noneOf(ApplicationRole.class);
 		for (Integer roleId: rolesIds) {
@@ -80,6 +85,13 @@ public enum ApplicationRole {
 		return roles;
 	}
 	
+	/**
+	 * Returns a role by id. If the role is not found then an {@link com.dvd.exception.ResourceNotFoundException} is thrown.
+	 * 
+	 * 
+	 * @param id - the id of the role
+	 * @return The role.
+	 */
 	public static ApplicationRole getRoleById(Integer id) {
 		for (ApplicationRole role : values()) {
 			if (role.getId() == id) {

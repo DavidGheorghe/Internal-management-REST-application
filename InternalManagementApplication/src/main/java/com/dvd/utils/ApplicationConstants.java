@@ -35,4 +35,8 @@ public class ApplicationConstants {
 	public static final String API_PRODUCT_CATEGORY_ROOT = API_ROOT + "product-category";
 	
 	public static final String API_PRODUCT_ROOT = API_ROOT + "product";
+	
+	public static final String API_ORDER_ROOT = API_ROOT + "order";
+	
+	public static final String CLIENT_SIDE_URL = "http://localhost:8081/";
 }

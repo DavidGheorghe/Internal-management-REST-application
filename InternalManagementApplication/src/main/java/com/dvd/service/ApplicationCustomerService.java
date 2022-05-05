@@ -25,14 +25,14 @@ public interface ApplicationCustomerService {
 	ApplicationCustomerDTO deleteCustomerById(Long id);
 
 	/**
-	 * Returns the customer. The response is based on pagination and sorting.
+	 * Returns the customers. The response is based on pagination and sorting.
 	 * Go to {@link com.dvd.utils.ApplicationConstants} class to see the parameters default values.
 	 * 
 	 * @param pageNo - page number.
 	 * @param pageSize - page size.
 	 * @param sortBy - criteria for sorting.
 	 * @param sortDir - sorting direction  (ASC or DESC).
-	 * @return A custom response with customer.
+	 * @return A custom response with customers.
 	 */
 	GetResourcesResponse<ApplicationCustomerDTO> getAllCustomers(int pageNo, int pageSize, String sortBy, String sortDir);
 

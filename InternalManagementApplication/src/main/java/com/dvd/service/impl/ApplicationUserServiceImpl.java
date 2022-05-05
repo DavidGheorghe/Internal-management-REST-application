@@ -21,6 +21,7 @@ import com.dvd.entity.ApplicationPrivilege;
 import com.dvd.entity.ApplicationRole;
 import com.dvd.entity.ApplicationUser;
 import com.dvd.exception.RemovePrivilegeFromUserException;
+import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.exception.SamePasswordException;
 import com.dvd.exception.SameUsernameException;
 import com.dvd.exception.UsernameTakenException;
@@ -132,7 +133,6 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 			user.getRoles().addAll(ApplicationRole.getRolesFromIds(rolesIds));
 			userRepository.save(user);
 		}
-		// TODO: handle case when the ids are null.
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 
@@ -193,5 +193,11 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 			}
 		}
 		return contains;
+	}
+
+	@Override
+	public ApplicationUserDTO getCurrentUser(String username) {
+		ApplicationUser currentUser = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException(username));
+		return mapper.map(currentUser, ApplicationUserDTO.class);
 	}
 }

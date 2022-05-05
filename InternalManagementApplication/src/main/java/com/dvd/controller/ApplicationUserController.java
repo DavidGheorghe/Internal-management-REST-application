@@ -39,7 +39,7 @@ import lombok.extern.log4j.Log4j2;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(ApplicationConstants.ADMIN_API_USER_ROOT)
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+//@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class ApplicationUserController {
 	private final ApplicationUserService userService;
 	
@@ -112,5 +112,9 @@ public class ApplicationUserController {
 		return new ResponseEntity<ApplicationUserDTO>(deletedUser, HttpStatus.OK);
 	}
 	
-	// TODO: add permission to retrieve own user
+	@GetMapping("/current")
+	public ResponseEntity<ApplicationUserDTO> getCurrentUser(Principal principal) {
+		ApplicationUserDTO currentUser = userService.getCurrentUser(principal.getName());
+		return new ResponseEntity<ApplicationUserDTO>(currentUser, OK);
+	}
 }
