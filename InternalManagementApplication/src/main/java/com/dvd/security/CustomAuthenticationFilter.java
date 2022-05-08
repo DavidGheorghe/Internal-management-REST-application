@@ -39,8 +39,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 		final String requestUrl = request.getRequestURL().toString();
 		String accessToken = jwtUtils.generateAccessToken(authResult, requestUrl);
 		String refreshToken = jwtUtils.generateRefreshToken(authResult, requestUrl);
-		response.setHeader("Access token", "Bearer " + accessToken);
-		response.setHeader("Refresh token ", "Bearer " + refreshToken);
+		response.setHeader("Access-Token", "Bearer " + accessToken);
+		response.setHeader("Refresh-Token ", "Bearer " + refreshToken);
 	}
 
 	@Override

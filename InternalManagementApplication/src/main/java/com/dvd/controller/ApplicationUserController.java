@@ -111,10 +111,4 @@ public class ApplicationUserController {
 		}
 		return new ResponseEntity<ApplicationUserDTO>(deletedUser, HttpStatus.OK);
 	}
-	
-	@GetMapping("/current")
-	public ResponseEntity<ApplicationUserDTO> getCurrentUser(Principal principal) {
-		ApplicationUserDTO currentUser = userService.getCurrentUser(principal.getName());
-		return new ResponseEntity<ApplicationUserDTO>(currentUser, OK);
-	}
 }

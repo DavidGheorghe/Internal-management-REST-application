@@ -1,5 +1,6 @@
 package com.dvd.exception;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -67,7 +68,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
 		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
 	}
-
+	
+	@ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+	public ResponseEntity<CustomExceptionDetails> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception, WebRequest webRequest) {
+		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
+		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.CONFLICT);
+	}
+	
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<CustomExceptionDetails> handleBadCredentialsException(BadCredentialsException exception, WebRequest webRequest) {
+		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
+		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
+	}
+	
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
