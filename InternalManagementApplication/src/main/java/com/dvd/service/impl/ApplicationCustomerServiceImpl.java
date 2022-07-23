@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,32 @@ public class ApplicationCustomerServiceImpl implements ApplicationCustomerServic
 		response.setGetResourcesResponseFields(content, customers);
 		return response;
 	}
-
+	
+	@Override
+	public List<ApplicationCustomerDTO> getAllCustomers() {
+		List<ApplicationCustomerDTO> customersDTO = new ArrayList<>();
+		List<ApplicationCustomer> customers = customerRepository.findAll();
+		customers.stream().forEach(customer -> customersDTO.add(mapper.map(customer, ApplicationCustomerDTO.class)));
+		return customersDTO;
+	}
+	
+	@Override
+	public GetResourcesResponse<ApplicationCustomerDTO> getAllCustomersFilteredBy(String keyword, int pageNo,
+			int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+//		String pattern = "%" + keyword + "%";
+		Page<ApplicationCustomer> customers = customerRepository.findByAllColumnsContains(keyword, pageable);
+		List<ApplicationCustomer> listOfCustomers = customers.getContent();
+		List<ApplicationCustomerDTO> content = listOfCustomers
+													.stream()
+													.map(customer -> mapper.map(customer, ApplicationCustomerDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<ApplicationCustomerDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, customers);
+		return response;
+	}
+	
 	@Override
 	public ApplicationCustomerDTO getCustomerById(Long id) {
 		ApplicationCustomer customer = UtilsMethods.getResourceByIdOrElseThrow(customerRepository, id, "Customer");

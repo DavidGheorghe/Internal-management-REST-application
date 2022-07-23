@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -21,6 +22,7 @@ import com.dvd.jwt.JwtUtils;
 import com.dvd.security.CustomAuthenticationFilter;
 import com.dvd.security.CustomAuthorizationFilter;
 import com.dvd.security.CustomUserDetailsService;
+import com.dvd.security.JwtAccessDeniedHandler;
 import com.dvd.security.JwtAuthenticationEntryPoint;
 import com.dvd.utils.ApplicationConstants;
 
@@ -41,7 +43,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtils jwtConfig;
 	private final JwtAuthenticationEntryPoint authenticationEntryPoint;
-	
+	private final JwtAccessDeniedHandler accessDeniedHandler;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(), jwtConfig);
@@ -51,14 +54,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 			.csrf().disable()
 			.exceptionHandling()
 			.authenticationEntryPoint(authenticationEntryPoint)
+			.accessDeniedHandler(accessDeniedHandler)
 			.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and()
 				.addFilter(customAuthenticationFilter)
-				.addFilterBefore(customAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-				.authorizeRequests().antMatchers("/api/auth/login/**", "/api/auth/refreshToken").permitAll()
-			.and()
-				.authorizeRequests().anyRequest()
+				.addFilterBefore(customAuthorizationFilter, CustomAuthenticationFilter.class)
+				.authorizeRequests().antMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
+//				.and()
+//				.authorizeRequests()
+				.anyRequest()
 			.authenticated();
 	}
 	

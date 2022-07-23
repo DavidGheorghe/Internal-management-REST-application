@@ -1,6 +1,7 @@
 package com.dvd.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +59,25 @@ public class ApplicationCustomerController {
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
 			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		return new ResponseEntity<GetResourcesResponse<ApplicationCustomerDTO>>(customerService.getAllCustomers(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);		
+		GetResourcesResponse<ApplicationCustomerDTO> customers = customerService.getAllCustomers(pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<ApplicationCustomerDTO>>(customers, HttpStatus.OK);		
+	}
+
+	@GetMapping("/all")
+	public ResponseEntity<List<ApplicationCustomerDTO>> getAllCustomers() {
+		List<ApplicationCustomerDTO> customers = customerService.getAllCustomers();
+		return new ResponseEntity<List<ApplicationCustomerDTO>>(customers, HttpStatus.OK);
+	}
+	
+	@GetMapping("/search") 
+	public ResponseEntity<GetResourcesResponse<ApplicationCustomerDTO>> getAllCustomersFilteredBy(
+			@RequestParam(value = "keyword") String keyword,
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<ApplicationCustomerDTO> filteredCustomers = customerService.getAllCustomersFilteredBy(keyword, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<ApplicationCustomerDTO>>(filteredCustomers, HttpStatus.OK);		
 	}
 	
 	@GetMapping("/{id}")

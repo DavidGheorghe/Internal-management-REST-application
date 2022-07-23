@@ -1,6 +1,7 @@
 package com.dvd.service.impl;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,8 +55,7 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		/** Set status, due date, the customer, details and the content, then return a DTO. */
 		ApplicationOrder newOrder = new ApplicationOrder();
 		
-		ApplicationOrderStatus status = ApplicationOrderStatus.getStatusById(orderDTO.getStatusId());
-		newOrder.setStatus(status);
+		newOrder.setStatus(ApplicationOrderStatus.NEW);
 		
 		LocalDate dueDate = LocalDate.parse(orderDTO.getDueDate());
 		newOrder.setDueDate(dueDate);
@@ -66,7 +66,7 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		newOrder.setDetails(orderDTO.getDetails());
 		addContent(newOrder, orderDTO.getContent());
 		
-//		orderRepository.save(newOrder);
+		orderRepository.save(newOrder);
 		RetrievedOrderDTO newOrderDTO = mapper.map(newOrder, RetrievedOrderDTO.class);
 		return newOrderDTO;
 	}
@@ -96,11 +96,36 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 	}
 
 	@Override
+	public GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize,
+			String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationOrder> orders = orderRepository.findByIdOrCustomerNameAndCompany(keyword, pageable);
+		List<ApplicationOrder> listOfOrders = orders.getContent();
+		List<RetrievedOrderDTO> content = listOfOrders
+													.stream()
+													.map(order -> mapper.map(order, RetrievedOrderDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<RetrievedOrderDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, orders);
+		return response;
+	}
+
+	@Override
 	public RetrievedOrderDTO getOrderById(Long id) {
 		ApplicationOrder fetchedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
 		return mapper.map(fetchedOrder, RetrievedOrderDTO.class);
 	}
-	
+
+	@Override
+	public RetrievedOrderDTO updateOrderStatus(Long orderId, int statusId) {
+		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		ApplicationOrderStatus newStatus = ApplicationOrderStatus.getStatusById(statusId);
+		updatedOrder.setStatus(newStatus);
+		orderRepository.save(updatedOrder);
+		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+	}
+
 	@Override
 	public RetrievedOrderDTO updateOrder(Long id, ApplicationOrderDTO orderDTO) {
 		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
@@ -134,6 +159,15 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 			finalContent.add(content);
 		}
 		order.setContent(finalContent);
+	}
+	
+	@Override
+	public List<RetrievedOrderContentDTO> getOrderContent(Long orderId) {
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		Set<ApplicationOrderContent> content = order.getContent();
+		List<RetrievedOrderContentDTO> contentDTOs = new ArrayList<>();
+		content.forEach(c -> contentDTOs.add(mapper.map(c, RetrievedOrderContentDTO.class)));
+		return contentDTOs;
 	}
 	
 	private ApplicationOrderContent createOrderContentFromDTO(ApplicationOrderContentDTO contentDTO) {

@@ -2,11 +2,6 @@ package com.dvd.DTO;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-
-import com.dvd.validation.OnCreate;
-import com.dvd.validation.OnUpdate;
 
 import lombok.Data;
 
@@ -31,4 +26,7 @@ public class ApplicationCustomerDTO {
 	private String billingAddress;
 	@NotBlank
 	private String deliveryAddress;
+//	@JsonIgnore
+//	private Set<RetrievedOrderDTO> orders;
+	// TODO: create endpoint to get the orders.
 }

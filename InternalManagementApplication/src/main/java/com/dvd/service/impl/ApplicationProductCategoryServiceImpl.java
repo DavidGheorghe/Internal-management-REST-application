@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,8 +35,8 @@ public class ApplicationProductCategoryServiceImpl implements ApplicationProduct
 	@Override
 	public ApplicationProductCategoryDTO createProductCategory(ApplicationProductCategoryDTO productCategoryDTO) {
 		ApplicationProductCategory newCategory = mapper.map(productCategoryDTO, ApplicationProductCategory.class);
-		if (productCategoryRepository.existsByCategoryName(productCategoryDTO.getName())) {
-			throw new UniqueEntryException(productCategoryDTO.getName());
+		if (productCategoryRepository.existsByCategoryName(productCategoryDTO.getCategoryName())) {
+			throw new UniqueEntryException(productCategoryDTO.getCategoryName());
 		}
 		productCategoryRepository.save(newCategory);
 		return mapper.map(newCategory, ApplicationProductCategoryDTO.class);
@@ -73,10 +74,26 @@ public class ApplicationProductCategoryServiceImpl implements ApplicationProduct
 	@Override
 	public ApplicationProductCategoryDTO updateProductCategory(Long id, ApplicationProductCategoryDTO productCategoryDTO) {
 		ApplicationProductCategory updatedCategory = UtilsMethods.getResourceByIdOrElseThrow(productCategoryRepository, id, "Product Category");
-		if (UtilsMethods.isStringFieldValidForUpdate(updatedCategory.getCategoryName(), productCategoryDTO.getName())) {
-			updatedCategory.setCategoryName(productCategoryDTO.getName());
+		if (UtilsMethods.isStringFieldValidForUpdate(updatedCategory.getCategoryName(), productCategoryDTO.getCategoryName())) {
+			updatedCategory.setCategoryName(productCategoryDTO.getCategoryName());
 			productCategoryRepository.save(updatedCategory);
 		}
 		return mapper.map(updatedCategory, ApplicationProductCategoryDTO.class);
+	}
+
+	@Override
+	public List<String> getCategoriesNames() {
+		List<String> names = new ArrayList<>();
+		List<ApplicationProductCategory> categories = productCategoryRepository.findAll();
+		categories.stream().forEach(category -> names.add(category.getCategoryName()));
+		return names;
+	}
+	
+	@Override
+	public List<ApplicationProductCategoryDTO> getAllCategoriesWithoutPagination() {
+		List<ApplicationProductCategoryDTO> categoriesDTOs = new ArrayList<>();
+		List<ApplicationProductCategory> categories = productCategoryRepository.findAll();
+		categories.stream().forEach(category -> categoriesDTOs.add(mapper.map(category, ApplicationProductCategoryDTO.class)));
+		return categoriesDTOs;
 	}
 }

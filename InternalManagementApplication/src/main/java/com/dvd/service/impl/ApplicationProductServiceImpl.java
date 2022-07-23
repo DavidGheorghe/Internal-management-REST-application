@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.dvd.DTO.ApplicationProductDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.RetrievedApplicationProductDTO;
+import com.dvd.DTO.CategoriesIdsDTO;
 import com.dvd.entity.ApplicationProductCategory;
 import com.dvd.entity.product.ApplicationProduct;
 import com.dvd.entity.product.ApplicationProductPrices;
@@ -33,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class ApplicationProductServiceImpl implements ApplicationProductService {
 	private final ApplicationProductRepository productRepository;
-	private final ApplicationProductCategoryRepository productTypeRepository;
+	private final ApplicationProductCategoryRepository productCategoryRepository;
 	private final ModelMapper mapper;
 	
 	@Override
@@ -42,7 +44,7 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 		newProduct.setName(productDTO.getName());
 		newProduct.setProductPrices(createProductPricesFromDTO(productDTO));
 		newProduct.setProductSizes(createProductSizesFromDTO(productDTO));
-		ApplicationProductCategory productType = UtilsMethods.getResourceByIdOrElseThrow(productTypeRepository, productDTO.getProductCategoryId(), "Product Type");
+		ApplicationProductCategory productType = UtilsMethods.getResourceByIdOrElseThrow(productCategoryRepository, productDTO.getProductCategoryId(), "Product Type");
 		newProduct.setCategory(productType);
 		ApplicationProduct createdProduct = productRepository.save(newProduct);
 		return mapper.map(createdProduct, RetrievedApplicationProductDTO.class);
@@ -57,7 +59,7 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 	}
 
 	@Override
-	public GetResourcesResponse<RetrievedApplicationProductDTO> getAllProducts(int pageNo, int pageSize, String sortBy,
+	public GetResourcesResponse<RetrievedApplicationProductDTO> getProducts(int pageNo, int pageSize, String sortBy,
 			String sortDir) {
 		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
@@ -71,7 +73,47 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 		response.setGetResourcesResponseFields(content, products);
 		return response;
 	}
-
+	
+	@Override
+	public List<RetrievedApplicationProductDTO> getAllProducts() {
+		List<RetrievedApplicationProductDTO> productsDTOs = new ArrayList<>();
+		List<ApplicationProduct> products = productRepository.findAll();
+		products.stream().forEach(product -> productsDTOs.add(mapper.map(product, RetrievedApplicationProductDTO.class)));
+		return productsDTOs;
+	}
+	
+	@Override
+	public GetResourcesResponse<RetrievedApplicationProductDTO> getAllProductsByCategoryIdAndFilteredBy(Long productCategoryId,
+			String keyword, int pageNo, int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationProduct> products = keyword == null ? productRepository.findAllByCategoryId(productCategoryId, pageable) : productRepository.findAllByCategoryIdAndNameContains(productCategoryId, keyword, pageable);
+		List<ApplicationProduct> listOfProducts = products.getContent();
+		List<RetrievedApplicationProductDTO> content = listOfProducts
+													.stream()
+													.map(product -> mapper.map(product, RetrievedApplicationProductDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<RetrievedApplicationProductDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, products);
+		return response;
+	}
+	
+	@Override
+	public GetResourcesResponse<RetrievedApplicationProductDTO> getProductsByCategories(
+			CategoriesIdsDTO productDTO, int pageNo, int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationProduct> products = productRepository.findAllByCategoriesIds(productDTO.getIds(), pageable);
+		List<ApplicationProduct> listOfProducts = products.getContent();
+		List<RetrievedApplicationProductDTO> content = listOfProducts
+													.stream()
+													.map(product -> mapper.map(product, RetrievedApplicationProductDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<RetrievedApplicationProductDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, products);
+		return response;
+	}
+	
 	@Override
 	public RetrievedApplicationProductDTO getProductById(Long id) {
 		ApplicationProduct retrievedProduct = UtilsMethods.getResourceByIdOrElseThrow(productRepository, id, "Product");
@@ -97,6 +139,21 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 		return mapper.map(updatedProduct, RetrievedApplicationProductDTO.class);
 	}
 	
+	@Override
+	public GetResourcesResponse<RetrievedApplicationProductDTO> getProductsSearchedBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationProduct> products = productRepository.findAllByNameContains(keyword, pageable);
+		List<ApplicationProduct> listOfProducts = products.getContent();
+		List<RetrievedApplicationProductDTO> content = listOfProducts
+													.stream()
+													.map(product -> mapper.map(product, RetrievedApplicationProductDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<RetrievedApplicationProductDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, products);
+		return response;
+	}
+	
 	/**
 	 * Creates a {@link com.dvd.entity.product.ProductSizes} object from DTO.
 	 * 
@@ -105,10 +162,9 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 	 */
 	private ApplicationProductSizes createProductSizesFromDTO(ApplicationProductDTO productDTO) {
 		Double height = productDTO.getHeight();
-		Double width = productDTO.getWidth();
 		Double diameter = productDTO.getDiameter();
 		Double weight = productDTO.getWeight();		
-		return new ApplicationProductSizes(height, width, diameter, weight);
+		return new ApplicationProductSizes(height, diameter, weight);
 	}
 	
 	/**
@@ -130,7 +186,7 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 	 * @param productCategoryId - the id of the product category.
 	 */
 	private void updateProductCategory(ApplicationProduct updatedProduct, Long productCategoryId) {
-		ApplicationProductCategory productCategory = UtilsMethods.getResourceByIdOrElseThrow(productTypeRepository, productCategoryId, "Product Category");
+		ApplicationProductCategory productCategory = UtilsMethods.getResourceByIdOrElseThrow(productCategoryRepository, productCategoryId, "Product Category");
 		if (!productCategory.equals(updatedProduct.getCategory())) {
 			updatedProduct.setCategory(productCategory);
 		}
@@ -151,9 +207,6 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 		}
 		if (UtilsMethods.isFieldValidForUpdate(productDTO.getWeight(), updatedProduct.getProductSizes().getWeight())) {
 			updatedProduct.getProductSizes().setWeight(productDTO.getWeight());
-		}
-		if (UtilsMethods.isFieldValidForUpdate(productDTO.getWidth(), updatedProduct.getProductSizes().getWidth())) {
-			updatedProduct.getProductSizes().setWidth(productDTO.getWidth());
 		}
 	}
 	
@@ -180,7 +233,7 @@ public class ApplicationProductServiceImpl implements ApplicationProductService 
 	 */
 	private boolean areProductSizesUpdated(ApplicationProductDTO productDTO) {
 		boolean areSizesUpdated = false;
-		if (productDTO.getDiameter() != null || productDTO.getHeight() != null || productDTO.getWeight() != null || productDTO.getWidth() != null) {
+		if (productDTO.getDiameter() != null || productDTO.getHeight() != null || productDTO.getWeight() != null) {
 			areSizesUpdated = true;
 		}
 		return areSizesUpdated;

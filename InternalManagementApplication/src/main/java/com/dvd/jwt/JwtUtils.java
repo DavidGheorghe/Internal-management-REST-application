@@ -70,6 +70,23 @@ public class JwtUtils {
 		return refreshToken;
 	}
 	
+	public String generateRefreshTokenFromUsername(String username, String requestURL) {
+//		User user = (User) authentication.getPrincipal();
+//		String username = user.getUsername();
+		Algorithm algorithm = this.getAlgorithm();
+		
+		long expirationTime = this.getRefreshTokenExpirationTime();
+		Date expirationDate = new Date(expirationTime);
+		
+		String refreshToken = JWT.create()
+				.withSubject(username)
+				.withExpiresAt(expirationDate)
+				.withIssuer(requestURL)
+				.sign(algorithm);
+		
+		return refreshToken;
+	}
+	
 	public String generateAccessTokenAfterExpiration(ApplicationUser user, String requestURL) {
 		List<String> authorities = user.getAuthorities().stream().map(authority -> authority.getAuthority()).collect(Collectors.toList());
 		Date expirationDate = new Date(this.getAccessTokenExpirationTime());
@@ -89,12 +106,12 @@ public class JwtUtils {
 		return decodedJWT;
 	}
 	
-	public String getUsernameFromToken(String token) {		
+	public String getUsernameFromToken(String token) {
 		return JWT.decode(token).getSubject();
 	}
 	
 	public long getAccessTokenExpirationTime() {
-		return System.currentTimeMillis() + this.getAccessTokenTimeExpirationHours() * 60 * 60 * 1000;
+		return System.currentTimeMillis() + this.getAccessTokenTimeExpirationHours() * 60 * 60 * 1000; // System.currentTimeMillis() + 60 * 1000
 	}
 	
 	public long getRefreshTokenExpirationTime() {
@@ -103,5 +120,13 @@ public class JwtUtils {
 	
 	public Algorithm getAlgorithm() {
 		return Algorithm.HMAC256(this.getSecretKey().getBytes());
+	}
+	
+	public boolean validateJwtToken(String token) {
+//		try {
+//			JWTVerifier verifier = JWT.require(getAlgorithm())
+//					.withIssuer(token).build();
+//		}
+		return true;
 	}
 }

@@ -1,5 +1,7 @@
 package com.dvd.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +50,20 @@ public class ApplicationProductCategoryController {
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
 			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		return new ResponseEntity<GetResourcesResponse<ApplicationProductCategoryDTO>>(productCategoryService.getAllProductCategories(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);		
+		GetResourcesResponse<ApplicationProductCategoryDTO> categories = productCategoryService.getAllProductCategories(pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<ApplicationProductCategoryDTO>>(categories, HttpStatus.OK);		
+	}
+	
+	@GetMapping("/names") 
+	public ResponseEntity<List<String>> getCategoriesNames() {
+		List<String> categoriesNames = productCategoryService.getCategoriesNames();
+		return new ResponseEntity<List<String>>(categoriesNames, HttpStatus.OK);
+	}
+	
+	@GetMapping("/all") 
+	public ResponseEntity<List<ApplicationProductCategoryDTO>> getAllCategoriesWithoutPagination() {
+		List<ApplicationProductCategoryDTO> categoriesWithoutPagination = productCategoryService.getAllCategoriesWithoutPagination();
+		return new ResponseEntity<List<ApplicationProductCategoryDTO>>(categoriesWithoutPagination, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")

@@ -1,5 +1,7 @@
 package com.dvd.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dvd.DTO.ApplicationProductDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.RetrievedApplicationProductDTO;
+import com.dvd.DTO.CategoriesIdsDTO;
 import com.dvd.service.ApplicationProductService;
 import com.dvd.utils.ApplicationConstants;
 
@@ -44,12 +47,53 @@ public class ApplicationProductController {
 	}
 	
 	@GetMapping()
-	public ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>> getAllProducts(
+	public ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>> getProducts(
 			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
 			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		return new ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>>(productService.getAllProducts(pageNo, pageSize, sortBy, sortDir), HttpStatus.OK);
+		GetResourcesResponse<RetrievedApplicationProductDTO> allProducts = productService.getProducts(pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>>(allProducts, HttpStatus.OK);
+	}
+	
+	@GetMapping("/all")
+	public ResponseEntity<List<RetrievedApplicationProductDTO>> getAllProducts() {
+		List<RetrievedApplicationProductDTO> products = productService.getAllProducts();
+		return new ResponseEntity<List<RetrievedApplicationProductDTO>>(products, HttpStatus.OK);
+	}
+	
+	@GetMapping("/category/{categoryId}")
+	public ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>> getAllProductsByCategoryIdAndFilteredBy(
+			@PathVariable Long categoryId,
+			@RequestParam(value = "keyword", required = false) String keyword,
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<RetrievedApplicationProductDTO> productsByCategory = productService.getAllProductsByCategoryIdAndFilteredBy(categoryId, keyword, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>>(productsByCategory, HttpStatus.OK);
+	}
+	
+	@GetMapping("/categories")
+	public ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>> getAllProductsByCategories(
+			@RequestBody CategoriesIdsDTO categoriesIds, // not working with axios
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<RetrievedApplicationProductDTO> products = productService.getProductsByCategories(categoriesIds, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>>(products, HttpStatus.OK);
+	}
+	
+	@GetMapping("/search")
+	public ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>> getProductsSearchedBy(
+			@RequestParam(value = "keyword") String keyword,
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<RetrievedApplicationProductDTO> productsByCategory = productService.getProductsSearchedBy(keyword, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedApplicationProductDTO>>(productsByCategory, HttpStatus.OK);
 	}
 	
 	@GetMapping("/{id}")

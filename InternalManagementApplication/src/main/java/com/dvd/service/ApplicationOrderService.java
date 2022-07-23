@@ -1,7 +1,10 @@
 package com.dvd.service;
 
+import java.util.List;
+
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderDTO;
+import com.dvd.DTO.order.RetrievedOrderContentDTO;
 import com.dvd.DTO.order.RetrievedOrderDTO;
 
 /**
@@ -30,13 +33,27 @@ public interface ApplicationOrderService {
 	 * Returns the orders. The response is based on pagination and sorting.
 	 * Go to {@link com.dvd.utils.ApplicationConstants} class to see the parameters default values.
 	 * 
-	 * @param pageNo - page number.
-	 * @param pageSize - page size.
-	 * @param sortBy - criteria for sorting.
-	 * @param sortDir - sorting direction  (ASC or DESC).
+	 * @param pageNo 	- page number.
+	 * @param pageSize 	- page size.
+	 * @param sortBy 	- criteria for sorting.
+	 * @param sortDir 	- sorting direction  (ASC or DESC).
 	 * @return A custom response with orders.
 	 */
 	GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+	
+	/**
+	 * Returns the orders which match a specific keyword. The filtration is done on the customer name and company. 
+	 * The response is based on pagination and sorting. Go to {@link com.dvd.utils.ApplicationConstants} class to see the parameters default values.
+	 * 
+	 * @param keyword 	- the string based on which the orders are filtered.
+	 * @param pageNo 	- page number.
+	 * @param pageSize 	- page size.
+	 * @param sortBy 	- criteria for sorting.
+	 * @param sortDir 	- sorting direction  (ASC or DESC).
+	 * @return A custom response with orders.
+	 */
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir);
+	
 	
 	/**
 	 * Retrieves an order by id.
@@ -51,18 +68,20 @@ public interface ApplicationOrderService {
 	/**
 	 * Updates the status of an order.
 	 * 
-	 * @param orderId - the id of the order being updated.
-	 * @param statusId - the id of the new status.
+	 * @param orderId 	- the id of the order being updated.
+	 * @param statusId 	- the id of the new status.
 	 * @return The updated order as DTO.
 	 */
-//	RetrievedOrderDTO updateOrderStatus(Long orderId, int statusId);
+	RetrievedOrderDTO updateOrderStatus(Long orderId, int statusId);
 	
 	/**
 	 * Updates the customer of an order.
 	 * 
-	 * @param orderId - the id of the order being updated.
-	 * @param customerId - the id of the new customer.
+	 * @param orderId 		- the id of the order being updated.
+	 * @param customerId 	- the id of the new customer.
 	 * @return The updated order as DTO.
 	 */
 //	RetrievedOrderDTO updateOrderCustomer(Long orderId, Long customerId);
+	
+	List<RetrievedOrderContentDTO> getOrderContent(Long orderId);
 }

@@ -10,5 +10,5 @@ import lombok.Data;
 @Data
 public class ApplicationProductCategoryDTO {
 	private Long id;
-	private String name;
+	private String categoryName;
 }

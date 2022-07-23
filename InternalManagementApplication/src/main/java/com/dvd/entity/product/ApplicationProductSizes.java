@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ApplicationProductSizes {
 	private Double height;
-	private Double width;
 	private Double diameter;
 	private Double weight;
 }

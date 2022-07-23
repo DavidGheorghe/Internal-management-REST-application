@@ -8,10 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,21 +67,16 @@ public class AuthController {
 				.body(currentUser);
 	}
 	
-	@GetMapping(ApplicationConstants.AUTH_REFRESH_TOKEN)
+	@PostMapping(ApplicationConstants.AUTH_REFRESH_TOKEN)
 	public ResponseEntity<String> getRefreshToken(HttpServletRequest request) {
 		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (authorizationHeader != null && authorizationHeader.startsWith(ApplicationConstants.JWT_AUTHORIZATION_PREFIX)) {
-			try {
-				
-			} catch (Exception e) {
-				
-			}
 			String uriStr = ServletUriComponentsBuilder.fromCurrentContextPath().path(ApplicationConstants.AUTH_REFRESH_TOKEN).toUriString();
 			
 			String refreshToken = authorizationHeader.substring(ApplicationConstants.JWT_AUTHORIZATION_PREFIX.length());
 			String username = jwtUtils.getUsernameFromToken(refreshToken);
-			ApplicationUser user = userRepository.findByUsername(username).get();
-			String newAccessToken = jwtUtils.generateAccessTokenAfterExpiration(user, uriStr);
+//			ApplicationUser user = userRepository.findByUsername(username).get();
+			String newAccessToken = jwtUtils.generateRefreshTokenFromUsername(username, uriStr); //jwtUtils.generateAccessTokenAfterExpiration(user, uriStr);
 			
 			HttpHeaders responseHeaders = this.getHeadersWithTokens(newAccessToken, refreshToken);
 			

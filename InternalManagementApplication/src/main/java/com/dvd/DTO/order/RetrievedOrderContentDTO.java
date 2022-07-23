@@ -1,7 +1,7 @@
 package com.dvd.DTO.order;
 
 import com.dvd.DTO.ApplicationColorDTO;
-import com.dvd.DTO.ApplicationProductDTO;
+import com.dvd.DTO.RetrievedApplicationProductDTO;
 
 import lombok.Data;
 
@@ -14,6 +14,6 @@ import lombok.Data;
 public class RetrievedOrderContentDTO {
 	private Long id;
 	private ApplicationColorDTO color;
-	private ApplicationProductDTO product;
+	private RetrievedApplicationProductDTO product;
 	private Integer quantity;
 }

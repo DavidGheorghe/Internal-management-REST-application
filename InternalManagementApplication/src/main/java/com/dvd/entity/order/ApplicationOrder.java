@@ -67,10 +67,10 @@ public class ApplicationOrder {
 	}
 	
 	public String toString() {
-		return createString();
+		return createToString();
 	}
 	
-	private String createString() {
+	private String createToString() {
 		StringBuilder strBuilder = new StringBuilder();
 		return strBuilder.append("Order[ id = ").append(getId()).append(", status = ").append(getStatus()).append(", due date = ")
 			.append(getDueDate()).append(", customerId").append(getCustomer().getId()).toString();

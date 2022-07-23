@@ -1,6 +1,7 @@
 package com.dvd.controller;
 
 import java.security.Principal;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderDTO;
+import com.dvd.DTO.order.RetrievedOrderContentDTO;
 import com.dvd.DTO.order.RetrievedOrderDTO;
 import com.dvd.service.ApplicationOrderService;
 import com.dvd.utils.ApplicationConstants;
@@ -49,6 +51,11 @@ public class ApplicationOrderController {
 		RetrievedOrderDTO retrievedOrderDTO = orderService.getOrderById(id);
 		return new ResponseEntity<RetrievedOrderDTO>(retrievedOrderDTO, HttpStatus.OK);
 	}
+	@GetMapping("/content/{id}")
+	public ResponseEntity<List<RetrievedOrderContentDTO>> getOrderContent(@PathVariable Long id) {
+		List<RetrievedOrderContentDTO> content = orderService.getOrderContent(id);
+		return new ResponseEntity<List<RetrievedOrderContentDTO>>(content, HttpStatus.OK);
+	}
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<RetrievedOrderDTO> deleteById(@PathVariable Long id) {
@@ -66,8 +73,19 @@ public class ApplicationOrderController {
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
 	
+	@GetMapping("/search")
+	public ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>> getAllOrdersFilteredBy(
+			@RequestParam(value = "keyword") String keyword,
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
+	}
+	
 	@PutMapping("/{id}")
-	public ResponseEntity<RetrievedOrderDTO> updateOrderStatus(@PathVariable Long id, @RequestBody ApplicationOrderDTO orderDTO) {
+	public ResponseEntity<RetrievedOrderDTO> updateOrder(@PathVariable Long id, @RequestBody ApplicationOrderDTO orderDTO) {
 		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrder(id, orderDTO);
 		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 	}
@@ -77,4 +95,9 @@ public class ApplicationOrderController {
 //		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrderCustomer(orderId, customerId);
 //		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 //	}
+	@PutMapping("/status/{orderId}/{statusId}")
+	public ResponseEntity<RetrievedOrderDTO> updateOrderCustomer(@PathVariable Long orderId, @PathVariable int statusId) {
+		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrderStatus(orderId, statusId);
+		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
+	}
 }

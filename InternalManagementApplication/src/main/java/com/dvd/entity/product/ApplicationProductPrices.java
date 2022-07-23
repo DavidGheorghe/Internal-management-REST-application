@@ -1,5 +1,7 @@
 package com.dvd.entity.product;
 
+import java.text.DecimalFormat;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
@@ -21,7 +23,9 @@ public class ApplicationProductPrices {
 	private Double finalPrice;
 	
 	private Double computeFinalPrice() {
-		return priceWithoutVAT + ( ApplicationConstants.VAT / 100.0 ) * priceWithoutVAT;
+		DecimalFormat df = new DecimalFormat("0.00");
+		Double finalPrice = priceWithoutVAT + ( ApplicationConstants.VAT / 100.0 ) * priceWithoutVAT;
+		return Double.valueOf(df.format(finalPrice));
 	}
 	
 	public ApplicationProductPrices(Double productionCost, Double priceWithoutVAT) {

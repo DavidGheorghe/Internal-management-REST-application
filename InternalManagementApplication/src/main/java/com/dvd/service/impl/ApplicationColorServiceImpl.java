@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.dvd.DTO.ApplicationColorDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.entity.ApplicationColor;
-import com.dvd.exception.ResourceNotFoundException;
 import com.dvd.repository.ApplicationColorRepository;
 import com.dvd.service.ApplicationColorService;
 import com.dvd.utils.UtilsMethods;
@@ -46,25 +46,97 @@ public class ApplicationColorServiceImpl implements ApplicationColorService {
 		return deletedColorDTO;
 	}
 
+//	@Override
+//	public GetResourcesResponse<ApplicationColorDTO> getColors(int numberOfPigments, int pageNo, int pageSize, String sortBy, String sortDir) {
+//		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+//		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+//		Page<ApplicationColor> colors = numberOfPigments == 3 ? colorRepository.findAll(pageable) : 
+//																(numberOfPigments == 2 ? 
+//																		colorRepository.findAllByFirstAndSecondPigment(pageable) : colorRepository.findAllByFirstPigment(pageable));
+//		List<ApplicationColor> listOfColors = colors.getContent();
+//		List<ApplicationColorDTO> content = listOfColors
+//													.stream()
+//													.map(color -> mapper.map(color, ApplicationColorDTO.class))
+//													.collect(Collectors.toList());
+//		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
+//		response.setGetResourcesResponseFields(content, colors);
+//		return response;
+//	}
+
 	@Override
-	public GetResourcesResponse<ApplicationColorDTO> getAllColors(int pageNo, int pageSize, String sortBy, String sortDir) {
-		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
-		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
-		Page<ApplicationColor> colors = colorRepository.findAll(pageable);
-		List<ApplicationColor> listOfColors = colors.getContent();
-		List<ApplicationColorDTO> content = listOfColors
-													.stream()
-													.map(color -> mapper.map(color, ApplicationColorDTO.class))
-													.collect(Collectors.toList());
-		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
-		response.setGetResourcesResponseFields(content, colors);
-		return response;
+	public List<ApplicationColorDTO> getAllColors() {
+		List<ApplicationColorDTO> colorsDTOs = new ArrayList<>();
+		List<ApplicationColor> colors = colorRepository.findAll();
+		colors.stream().forEach(color -> colorsDTOs.add(mapper.map(color, ApplicationColorDTO.class)));
+		return colorsDTOs;
 	}
 
 	@Override
 	public ApplicationColorDTO getColorById(Long id) {
 		ApplicationColor color = UtilsMethods.getResourceByIdOrElseThrow(colorRepository, id, "Color");
 		return mapper.map(color, ApplicationColorDTO.class);
+	}
+
+	@Override
+	public GetResourcesResponse<ApplicationColorDTO> getColorsFilteredBy(String keyword, int pageNo, int pageSize,
+			String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationColor> colorsPage = keyword == null ? colorRepository.findAll(pageable) : colorRepository.findAllByNameContains(keyword, pageable);
+		List<ApplicationColor> listOfColors = colorsPage.getContent();
+		List<ApplicationColorDTO> content = listOfColors
+													.stream()
+													.map(color -> mapper.map(color, ApplicationColorDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, colorsPage);
+		return response;
+	}
+	
+	@Override
+	public GetResourcesResponse<ApplicationColorDTO> getColorsWithOnePigmentFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationColor> colorsPage = keyword == null ? colorRepository.findAllByFirstPigment(pageable) : colorRepository.findAllByFirstPigmentFilteredBy(keyword, pageable);
+		List<ApplicationColor> listOfColors = colorsPage.getContent();
+		List<ApplicationColorDTO> content = listOfColors
+													.stream()
+													.map(colors -> mapper.map(colors, ApplicationColorDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, colorsPage);
+		return response;
+	}
+	
+	@Override
+	public GetResourcesResponse<ApplicationColorDTO> getColorsWithTwoPigmentsFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationColor> colorsPage = keyword == null ? colorRepository.findAllByFirstAndSecondPigment(pageable) : colorRepository.findAllByFirstAndSecondPigmentFilteredBy(keyword, pageable);
+		List<ApplicationColor> listOfColors = colorsPage.getContent();
+		List<ApplicationColorDTO> content = listOfColors
+													.stream()
+													.map(colors -> mapper.map(colors, ApplicationColorDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, colorsPage);
+		return response;
+	}
+
+	@Override
+	public GetResourcesResponse<ApplicationColorDTO> getColorsWithThreePigmentsFilteredBy(String keyword, int pageNo,
+			int pageSize, String sortBy, String sortDir) {
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationColor> colorsPage = keyword == null ? colorRepository.findAllByAllPigments(pageable) : colorRepository.findAllByAllPigmentsFilteredBy(keyword, pageable);
+		List<ApplicationColor> listOfColors = colorsPage.getContent();
+		List<ApplicationColorDTO> content = listOfColors
+													.stream()
+													.map(colors -> mapper.map(colors, ApplicationColorDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<ApplicationColorDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, colorsPage);
+		return response;
 	}
 
 	@Override
@@ -163,4 +235,6 @@ public class ApplicationColorServiceImpl implements ApplicationColorService {
 				break;
 		}
 	}
+
+
 }

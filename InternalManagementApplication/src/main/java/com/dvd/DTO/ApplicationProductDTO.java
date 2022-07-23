@@ -12,7 +12,6 @@ public class ApplicationProductDTO {
 	private String name;
 	private Long productCategoryId;
 	private Double height;
-	private Double width;
 	private Double weight;
 	private Double diameter;
 	private Double priceWithoutVAT;
