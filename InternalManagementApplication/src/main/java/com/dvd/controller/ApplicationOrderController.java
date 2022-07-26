@@ -83,6 +83,18 @@ public class ApplicationOrderController {
 		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, pageNo, pageSize, sortBy, sortDir);
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
+
+	@GetMapping("/status")
+	public ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>> getAllOrdersFilteredByStatus(
+			@RequestParam(value = "keyword") String keyword,
+			@RequestParam(value = "statusId") int statusId,
+			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
+			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
+			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
+		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, statusId, pageNo, pageSize, sortBy, sortDir);
+		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
+	}
 	
 	@PutMapping("/{id}")
 	public ResponseEntity<RetrievedOrderDTO> updateOrder(@PathVariable Long id, @RequestBody ApplicationOrderDTO orderDTO) {
@@ -96,8 +108,29 @@ public class ApplicationOrderController {
 //		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 //	}
 	@PutMapping("/status/{orderId}/{statusId}")
-	public ResponseEntity<RetrievedOrderDTO> updateOrderCustomer(@PathVariable Long orderId, @PathVariable int statusId) {
+	public ResponseEntity<RetrievedOrderDTO> updateOrderStatus(@PathVariable Long orderId, @PathVariable int statusId) {
 		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrderStatus(orderId, statusId);
 		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 	}
+	
+	// TODO change to patch
+	@PutMapping("/pin/{id}")
+	public ResponseEntity<RetrievedOrderDTO> pinOrder(@PathVariable Long id) {
+		RetrievedOrderDTO orderDTO = orderService.pinOrder(id);
+		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
+	}
+
+	@PutMapping("/unpin/{id}")
+	public ResponseEntity<RetrievedOrderDTO> unpinOrder(@PathVariable Long id) {
+		RetrievedOrderDTO orderDTO = orderService.unpinOrder(id);
+		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
+	}
+	
+	@PutMapping("/due-date")
+	public ResponseEntity<RetrievedOrderDTO> updateDueDate(@RequestParam(value = "id") Long orderId, @RequestParam(value = "due-date") String dueDate) {
+		RetrievedOrderDTO orderDTO = orderService.updateDueDate(orderId, dueDate);
+		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
+	}
+	
+	
 }

@@ -110,6 +110,25 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		response.setGetResourcesResponseFields(content, orders);
 		return response;
 	}
+	
+	@Override
+	public GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo,
+			int pageSize, String sortBy, String sortDir) {
+		ApplicationOrderStatus statusFilter = ApplicationOrderStatus.getStatusById(statusId);
+		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
+		Page<ApplicationOrder> orders = keyword.isEmpty() ? 
+				orderRepository.findByStatus(statusFilter, pageable) : 
+				orderRepository.findByIdOrCustomerNameAndCompanyAndStatus(keyword, statusFilter, pageable) ;
+		List<ApplicationOrder> listOfOrders = orders.getContent();
+		List<RetrievedOrderDTO> content = listOfOrders
+													.stream()
+													.map(order -> mapper.map(order, RetrievedOrderDTO.class))
+													.collect(Collectors.toList());
+		GetResourcesResponse<RetrievedOrderDTO> response = new GetResourcesResponse<>();
+		response.setGetResourcesResponseFields(content, orders);
+		return response;
+	}
 
 	@Override
 	public RetrievedOrderDTO getOrderById(Long id) {
@@ -150,7 +169,23 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		orderRepository.save(updatedOrder);
 		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
 	}
-	
+
+	@Override
+	public RetrievedOrderDTO pinOrder(Long id) {
+		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
+		updatedOrder.setPinned(true);
+		orderRepository.save(updatedOrder);
+		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+	}
+
+	@Override
+	public RetrievedOrderDTO unpinOrder(Long id) {
+		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
+		updatedOrder.setPinned(false);
+		orderRepository.save(updatedOrder);
+		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+	}
+
 	private void addContent(ApplicationOrder order, Set<ApplicationOrderContentDTO> contentSet) {
 		Set<ApplicationOrderContent> finalContent = new HashSet<ApplicationOrderContent>();
 		for (ApplicationOrderContentDTO contentDTO : contentSet) {
@@ -243,5 +278,17 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		if (UtilsMethods.isFieldValidForUpdate(newDueDate, oldDueDate)) {
 			order.setDueDate(newDueDate);
 		}
+	}
+	
+	@Override
+	public RetrievedOrderDTO updateDueDate(Long id, String dueDateStr) {
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
+		LocalDate newDueDate = LocalDate.parse(dueDateStr);
+		LocalDate oldDueDate = order.getDueDate();
+		if (UtilsMethods.isFieldValidForUpdate(newDueDate, oldDueDate)) {
+			order.setDueDate(newDueDate);
+		}
+		orderRepository.save(order);
+		return mapper.map(order, RetrievedOrderDTO.class);
 	}
 }

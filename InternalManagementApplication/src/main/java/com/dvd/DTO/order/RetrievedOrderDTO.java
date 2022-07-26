@@ -22,6 +22,5 @@ public class RetrievedOrderDTO {
 	private LocalDateTime entryDate;
 	private String details;
 	private ApplicationCustomerDTO customer;
-//	private Set<ApplicationOrderContentDTO> content;
-	// TODO: create endpoint to retrieve order content
+	private boolean isPinned;
 }

@@ -53,6 +53,7 @@ public interface ApplicationOrderService {
 	 * @return A custom response with orders.
 	 */
 	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir);
 	
 	
 	/**
@@ -82,6 +83,12 @@ public interface ApplicationOrderService {
 	 * @return The updated order as DTO.
 	 */
 //	RetrievedOrderDTO updateOrderCustomer(Long orderId, Long customerId);
+	RetrievedOrderDTO updateDueDate(Long orderId, String newDueDate);
+	
+	
 	
 	List<RetrievedOrderContentDTO> getOrderContent(Long orderId);
+	
+	RetrievedOrderDTO pinOrder(Long id);
+	RetrievedOrderDTO unpinOrder(Long id);
 }

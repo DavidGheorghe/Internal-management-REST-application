@@ -47,13 +47,14 @@ public class ApplicationOrder {
 	private LocalDateTime entryDate = LocalDateTime.now();
 	private LocalDate dueDate;
 	private String details;
+	private boolean isPinned = false;
 	
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "customer_id", nullable = false)
 	private ApplicationCustomer customer;
 	
-	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<ApplicationOrderContent> content;
 	
 	public void setCustomer(ApplicationCustomer customer) {
