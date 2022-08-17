@@ -55,7 +55,7 @@ public interface ApplicationOrderService {
 	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir);
 	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir);
 	
-	
+	List<RetrievedOrderDTO> getPinnedOrders();
 	/**
 	 * Retrieves an order by id.
 	 * 
@@ -85,10 +85,10 @@ public interface ApplicationOrderService {
 //	RetrievedOrderDTO updateOrderCustomer(Long orderId, Long customerId);
 	RetrievedOrderDTO updateDueDate(Long orderId, String newDueDate);
 	
-	
-	
 	List<RetrievedOrderContentDTO> getOrderContent(Long orderId);
 	
 	RetrievedOrderDTO pinOrder(Long id);
 	RetrievedOrderDTO unpinOrder(Long id);
+	
+	Double computeContentPrice(Long productId, Integer amount);
 }

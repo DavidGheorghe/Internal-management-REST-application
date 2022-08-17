@@ -1,5 +1,6 @@
 package com.dvd.service.impl;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -129,6 +130,14 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		response.setGetResourcesResponseFields(content, orders);
 		return response;
 	}
+	
+	@Override
+	public List<RetrievedOrderDTO> getPinnedOrders() {
+		List<RetrievedOrderDTO> pinnedOrdersDTO = new ArrayList<>();
+		List<ApplicationOrder> pinnedOrders = orderRepository.findByIsPinnedTrue();
+		pinnedOrders.stream().forEach(order -> pinnedOrdersDTO.add(mapper.map(order, RetrievedOrderDTO.class)));
+		return pinnedOrdersDTO;
+	}
 
 	@Override
 	public RetrievedOrderDTO getOrderById(Long id) {
@@ -186,6 +195,17 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
 	}
 
+	@Override
+	public Double computeContentPrice(Long productId, Integer amount) {
+		ApplicationProduct product = UtilsMethods.getResourceByIdOrElseThrow(productRepository, productId, "Product");
+		Double productPrice = product.getProductPrices().getFinalPrice();
+		Double contentPrice = productPrice * (double) amount;
+		DecimalFormat df = new DecimalFormat("0.00");
+		String formattedPriceLocale = df.format(contentPrice);
+		String formattedPriceFinal = formattedPriceLocale.replace(",", ".");
+		return Double.valueOf(formattedPriceFinal);
+	}
+	
 	private void addContent(ApplicationOrder order, Set<ApplicationOrderContentDTO> contentSet) {
 		Set<ApplicationOrderContent> finalContent = new HashSet<ApplicationOrderContent>();
 		for (ApplicationOrderContentDTO contentDTO : contentSet) {
@@ -201,7 +221,12 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
 		Set<ApplicationOrderContent> content = order.getContent();
 		List<RetrievedOrderContentDTO> contentDTOs = new ArrayList<>();
-		content.forEach(c -> contentDTOs.add(mapper.map(c, RetrievedOrderContentDTO.class)));
+		content.forEach(c -> {
+			RetrievedOrderContentDTO contentDTO = mapper.map(c, RetrievedOrderContentDTO.class);
+			Double contentPrice = computeContentPrice(c.getProduct().getId(), c.getQuantity());
+			contentDTO.setContentPrice(contentPrice);
+			contentDTOs.add(contentDTO);
+		});
 		return contentDTOs;
 	}
 	

@@ -96,6 +96,12 @@ public class ApplicationOrderController {
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
 	
+	@GetMapping("/pinned")
+	public ResponseEntity<List<RetrievedOrderDTO>> getAllPinnedOrders() {
+		List<RetrievedOrderDTO> pinnedOrders = orderService.getPinnedOrders();
+		return new ResponseEntity<List<RetrievedOrderDTO>>(pinnedOrders, HttpStatus.OK);
+	}
+	
 	@PutMapping("/{id}")
 	public ResponseEntity<RetrievedOrderDTO> updateOrder(@PathVariable Long id, @RequestBody ApplicationOrderDTO orderDTO) {
 		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrder(id, orderDTO);
@@ -132,5 +138,9 @@ public class ApplicationOrderController {
 		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
 	}
 	
-	
+	@GetMapping("/content-price")
+	public ResponseEntity<Double> computeContentPrice(@RequestParam(value = "productId") Long priceId, @RequestParam(value = "amount") Integer amount) {
+		Double price = orderService.computeContentPrice(priceId, amount);
+		return new ResponseEntity<Double>(price, HttpStatus.OK);
+	}
 }

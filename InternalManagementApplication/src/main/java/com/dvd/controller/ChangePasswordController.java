@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 *
 * @author David Gheorghe
 */
-@Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
@@ -34,10 +33,10 @@ public class ChangePasswordController {
 	private final ApplicationUserService userService;
 	
 	@PutMapping(ApplicationConstants.API_CHANGE_PASSWORD + "/{id}")
-	public ResponseEntity<ApplicationUserDTO> changePassword(@NotEmpty @Min(0) @PathVariable Long id, @Valid @RequestBody ChangePasswordDTO changePasswordDTO) {
+	public ResponseEntity<ApplicationUserDTO> changePassword(@PathVariable Long id, @RequestBody ChangePasswordDTO changePasswordDTO) {
 		String oldPassword = changePasswordDTO.getOldPassword();
 		String newPassword = changePasswordDTO.getNewPassword();
 		ApplicationUserDTO userDTO = userService.changePassword(id, oldPassword, newPassword);
-		return new ResponseEntity<ApplicationUserDTO>(userDTO, HttpStatus.OK);		
+		return new ResponseEntity<ApplicationUserDTO>(userDTO, HttpStatus.OK);
 	}
 }

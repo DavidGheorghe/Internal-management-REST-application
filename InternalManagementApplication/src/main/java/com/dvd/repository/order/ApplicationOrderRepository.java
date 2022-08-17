@@ -1,5 +1,7 @@
 package com.dvd.repository.order;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +30,6 @@ public interface ApplicationOrderRepository extends JpaRepository<ApplicationOrd
 	
 	@Query("Select o FROM ApplicationOrder o WHERE o.status = ?1")
 	Page<ApplicationOrder> findByStatus(ApplicationOrderStatus status, Pageable pageable);
+	
+	List<ApplicationOrder> findByIsPinnedTrue();
 }
