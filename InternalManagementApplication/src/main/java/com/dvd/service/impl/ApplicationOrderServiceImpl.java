@@ -20,6 +20,9 @@ import com.dvd.DTO.order.ApplicationOrderContentDTO;
 import com.dvd.DTO.order.ApplicationOrderDTO;
 import com.dvd.DTO.order.RetrievedOrderContentDTO;
 import com.dvd.DTO.order.RetrievedOrderDTO;
+import com.dvd.DTO.reports.ActiveAndDueOrdersReportsDTO;
+import com.dvd.DTO.reports.CompletedOrdersReportDTO;
+import com.dvd.DTO.reports.NewOrdersReportDTO;
 import com.dvd.entity.ApplicationColor;
 import com.dvd.entity.ApplicationCustomer;
 import com.dvd.entity.order.ApplicationOrder;
@@ -315,5 +318,67 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		}
 		orderRepository.save(order);
 		return mapper.map(order, RetrievedOrderDTO.class);
+	}
+	
+	@Override
+	public ActiveAndDueOrdersReportsDTO getOrdersReports() {
+		ActiveAndDueOrdersReportsDTO orderReportsDTO = new ActiveAndDueOrdersReportsDTO();
+		Integer numberOfDueOrders = orderRepository.getNumberOfDueOrdersInOneWeek();
+		Integer numberOfActiveOrders = orderRepository.getNumberOfActiveOrders();
+		
+		orderReportsDTO.setNumberOfActiveOrders(numberOfActiveOrders);
+		orderReportsDTO.setNumberOfDueOrders(numberOfDueOrders);
+		
+		return orderReportsDTO;
+	}
+	
+	@Override
+	public CompletedOrdersReportDTO getCompletedOrdersReport() {
+		Integer eightWeeksAgo = orderRepository.getNumberOfCompletedOrdersEightWeeks();
+		Integer sevenWeeksAgo = orderRepository.getNumberOfCompletedOrdersSevenWeeks();
+		Integer sixWeeksAgo = orderRepository.getNumberOfCompletedOrdersSixWeeks();
+		Integer fiveWeeksAgo = orderRepository.getNumberOfCompletedOrdersFiveWeeks();
+		Integer fourWeeksAgo = orderRepository.getNumberOfCompletedOrdersFourWeeks();
+		Integer threeWeeksAgo = orderRepository.getNumberOfCompletedOrdersThreeWeeks();
+		Integer twoWeeksAgo = orderRepository.getNumberOfCompletedOrdersTwoWeeks();
+		Integer oneWeekAgo = orderRepository.getNumberOfCompletedOrdersOneWeek();
+		
+		CompletedOrdersReportDTO report = new CompletedOrdersReportDTO();
+		
+		report.setNumberOfOrderCompletedEightWeeksAgo(eightWeeksAgo);
+		report.setNumberOfOrderCompletedSevenWeeksAgo(sevenWeeksAgo);
+		report.setNumberOfOrderCompletedSixWeeksAgo(sixWeeksAgo);
+		report.setNumberOfOrderCompletedFiveWeeksAgo(fiveWeeksAgo);
+		report.setNumberOfOrderCompletedFourWeeksAgo(fourWeeksAgo);
+		report.setNumberOfOrderCompletedThreeWeeksAgo(threeWeeksAgo);
+		report.setNumberOfOrderCompletedTwoWeeksAgo(twoWeeksAgo);
+		report.setNumberOfOrderCompletedOneWeekAgo(oneWeekAgo);
+		
+		return report;
+	}
+	
+	@Override
+	public NewOrdersReportDTO getNewOrdersReport() {
+		Integer eightWeeksAgo = orderRepository.getNumberOfNewOrdersEightWeeks();
+		Integer sevenWeeksAgo = orderRepository.getNumberOfNewOrdersSevenWeeks();
+		Integer sixWeeksAgo = orderRepository.getNumberOfNewOrdersSixWeeks();
+		Integer fiveWeeksAgo = orderRepository.getNumberOfNewOrdersFiveWeeks();
+		Integer fourWeeksAgo = orderRepository.getNumberOfNewOrdersFourWeeks();
+		Integer threeWeeksAgo = orderRepository.getNumberOfNewOrdersThreeWeeks();
+		Integer twoWeeksAgo = orderRepository.getNumberOfNewOrdersTwoWeeks();
+		Integer oneWeekAgo = orderRepository.getNumberOfNewOrdersOneWeek();
+		
+		NewOrdersReportDTO report = new NewOrdersReportDTO();
+		
+		report.setNumberOfNewOrdersEightWeeksAgo(eightWeeksAgo);
+		report.setNumberOfNewOrdersSevenWeeksAgo(sevenWeeksAgo);
+		report.setNumberOfNewOrdersSixWeeksAgo(sixWeeksAgo);
+		report.setNumberOfNewOrdersFiveWeeksAgo(fiveWeeksAgo);
+		report.setNumberOfNewOrdersFourWeeksAgo(fourWeeksAgo);
+		report.setNumberOfNewOrdersThreeWeeksAgo(threeWeeksAgo);
+		report.setNumberOfNewOrdersTwoWeeksAgo(twoWeeksAgo);
+		report.setNumberOfNewOrdersOneWeekAgo(oneWeekAgo);
+		
+		return report;
 	}
 }

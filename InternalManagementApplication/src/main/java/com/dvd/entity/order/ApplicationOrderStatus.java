@@ -15,7 +15,7 @@ public enum ApplicationOrderStatus {
 	SEALING(5),
 	PACKING(6),
 	READY(7),
-	COMPLETED(8);
+	COMPLETE(8);
 	
 	private final int id;
 	ApplicationOrderStatus(int id) {

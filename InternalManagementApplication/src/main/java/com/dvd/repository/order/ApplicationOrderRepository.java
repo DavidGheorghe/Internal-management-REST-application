@@ -32,4 +32,94 @@ public interface ApplicationOrderRepository extends JpaRepository<ApplicationOrd
 	Page<ApplicationOrder> findByStatus(ApplicationOrderStatus status, Pageable pageable);
 	
 	List<ApplicationOrder> findByIsPinnedTrue();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.due_date between now() and date_add(now(), interval 7 day)", 
+			nativeQuery = true)
+	Integer getNumberOfDueOrdersInOneWeek();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.status <> 'COMPLETE' and o.status <> 'NEW'",
+			nativeQuery = true)
+	Integer getNumberOfActiveOrders();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -56 day) "
+			+ "and date_add(now(), interval -50 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersEightWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -49 day) "
+			+ "and date_add(now(), interval -43 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersSevenWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -42 day) "
+			+ "and date_add(now(), interval -36 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersSixWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -35 day) "
+			+ "and date_add(now(), interval -29 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersFiveWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -28 day) "
+			+ "and date_add(now(), interval -22 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersFourWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -21 day) "
+			+ "and date_add(now(), interval -15 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersThreeWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -14 day) "
+			+ "and date_add(now(), interval -8 day) ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersTwoWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.completion_date between date_add(now(), interval -7 day) "
+			+ "and now() ",
+			nativeQuery = true)
+	Integer getNumberOfCompletedOrdersOneWeek();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -56 day) "
+			+ "and date_add(now(), interval -50 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersEightWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -49 day) "
+			+ "and date_add(now(), interval -43 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersSevenWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -42 day) "
+			+ "and date_add(now(), interval -36 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersSixWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -35 day) "
+			+ "and date_add(now(), interval -29 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersFiveWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -28 day) "
+			+ "and date_add(now(), interval -22 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersFourWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -21 day) "
+			+ "and date_add(now(), interval -15 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersThreeWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -14 day) "
+			+ "and date_add(now(), interval -8 day) ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersTwoWeeks();
+	
+	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.entry_date between date_add(now(), interval -7 day) "
+			+ "and now() ",
+			nativeQuery = true)
+	Integer getNumberOfNewOrdersOneWeek();
+	
+	
 }

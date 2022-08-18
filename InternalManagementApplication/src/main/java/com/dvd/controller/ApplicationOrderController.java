@@ -19,6 +19,9 @@ import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderDTO;
 import com.dvd.DTO.order.RetrievedOrderContentDTO;
 import com.dvd.DTO.order.RetrievedOrderDTO;
+import com.dvd.DTO.reports.ActiveAndDueOrdersReportsDTO;
+import com.dvd.DTO.reports.CompletedOrdersReportDTO;
+import com.dvd.DTO.reports.NewOrdersReportDTO;
 import com.dvd.service.ApplicationOrderService;
 import com.dvd.utils.ApplicationConstants;
 
@@ -142,5 +145,22 @@ public class ApplicationOrderController {
 	public ResponseEntity<Double> computeContentPrice(@RequestParam(value = "productId") Long priceId, @RequestParam(value = "amount") Integer amount) {
 		Double price = orderService.computeContentPrice(priceId, amount);
 		return new ResponseEntity<Double>(price, HttpStatus.OK);
+	}
+	
+	@GetMapping("/reports")
+	public ResponseEntity<ActiveAndDueOrdersReportsDTO> getOrdersReports() {
+		ActiveAndDueOrdersReportsDTO ordersReports = orderService.getOrdersReports();
+		return new ResponseEntity<ActiveAndDueOrdersReportsDTO>(ordersReports, HttpStatus.OK);
+	}
+	
+	@GetMapping("/reports/complete")
+	public ResponseEntity<CompletedOrdersReportDTO> getCompletedOrdersReport() {
+		CompletedOrdersReportDTO ordersReport = orderService.getCompletedOrdersReport();
+		return new ResponseEntity<CompletedOrdersReportDTO>(ordersReport, HttpStatus.OK);
+	}
+	@GetMapping("/reports/new")
+	public ResponseEntity<NewOrdersReportDTO> getNewOrdersReport() {
+		NewOrdersReportDTO ordersReport = orderService.getNewOrdersReport();
+		return new ResponseEntity<NewOrdersReportDTO>(ordersReport, HttpStatus.OK);
 	}
 }

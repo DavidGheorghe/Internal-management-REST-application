@@ -45,6 +45,7 @@ public class ApplicationOrder {
 	private ApplicationOrderStatus status;
 	
 	private LocalDateTime entryDate = LocalDateTime.now();
+	private LocalDateTime completionDate;
 	private LocalDate dueDate;
 	private String details;
 	private boolean isPinned = false;
@@ -65,6 +66,13 @@ public class ApplicationOrder {
 	public void setContent(Set<ApplicationOrderContent> content) {
 		this.content = content;
 		content.forEach(obj -> obj.setOrder(this));
+	}
+	
+	public void setStatus(ApplicationOrderStatus status) {
+		if (status == ApplicationOrderStatus.COMPLETE) {
+			completionDate = LocalDateTime.now();
+		}
+		this.status = status;
 	}
 	
 	public String toString() {

@@ -16,4 +16,5 @@ public class RetrievedOrderContentDTO {
 	private ApplicationColorDTO color;
 	private RetrievedApplicationProductDTO product;
 	private Integer quantity;
+	private Double contentPrice;
 }

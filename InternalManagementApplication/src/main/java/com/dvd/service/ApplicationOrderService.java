@@ -6,6 +6,9 @@ import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderDTO;
 import com.dvd.DTO.order.RetrievedOrderContentDTO;
 import com.dvd.DTO.order.RetrievedOrderDTO;
+import com.dvd.DTO.reports.ActiveAndDueOrdersReportsDTO;
+import com.dvd.DTO.reports.CompletedOrdersReportDTO;
+import com.dvd.DTO.reports.NewOrdersReportDTO;
 
 /**
 * Defines the service layer for the Order resource.
@@ -91,4 +94,10 @@ public interface ApplicationOrderService {
 	RetrievedOrderDTO unpinOrder(Long id);
 	
 	Double computeContentPrice(Long productId, Integer amount);
+	
+	ActiveAndDueOrdersReportsDTO getOrdersReports();
+	
+	CompletedOrdersReportDTO getCompletedOrdersReport();
+
+	NewOrdersReportDTO getNewOrdersReport();
 }
