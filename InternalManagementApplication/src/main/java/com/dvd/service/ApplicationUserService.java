@@ -1,11 +1,13 @@
 package com.dvd.service;
 
 import java.security.Principal;
+import java.util.List;
 
 import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.CreateUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.UpdateUserDTO;
+import com.dvd.entity.ApplicationRole;
 
 /**
 * Defines the service interface for the User resource.
@@ -59,25 +61,6 @@ public interface ApplicationUserService {
 	ApplicationUserDTO updateUsername(Long id, UpdateUserDTO userDTO);
 	
 	/**
-	 * Adds privileges to a certain user.
-	 * 
-	 * @param id - the id of the user that is updated.
-	 * @param userDTO - DTO representation of a user with the new privileges.
-	 * @return The updated user.
-	 */
-	ApplicationUserDTO addPrivileges(Long id, UpdateUserDTO userDTO);
-	
-	/**
-	 * Removes privileges from a certain user.
-	 * 
-	 * @param id - the id of the user that is updated.
-	 * @param userDTO - DTO representation of a user with the privileges that will be removed.
-	 * @return The updated user.
-	 */
-	ApplicationUserDTO removePrivileges(Long id, UpdateUserDTO userDTO);
-	
-	
-	/**
 	 * Change password method.
 	 * 
 	 * @param id - the id of the user.
@@ -112,4 +95,8 @@ public interface ApplicationUserService {
 	 * @return
 	 */
 	ApplicationUserDTO getCurrentUser(String username);
+
+	List<ApplicationUserDTO> getAllUsers();
+
+	List<ApplicationUserDTO> getAllUsersByRole(ApplicationRole role);
 }

@@ -42,7 +42,7 @@ public interface ApplicationOrderService {
 	 * @param sortDir 	- sorting direction  (ASC or DESC).
 	 * @return A custom response with orders.
 	 */
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
 	
 	/**
 	 * Returns the orders which match a specific keyword. The filtration is done on the customer name and company. 
@@ -55,10 +55,10 @@ public interface ApplicationOrderService {
 	 * @param sortDir 	- sorting direction  (ASC or DESC).
 	 * @return A custom response with orders.
 	 */
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir);
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
 	
-	List<RetrievedOrderDTO> getPinnedOrders();
+	List<RetrievedOrderDTO> getDashboardOrders(Long userId);
 	/**
 	 * Retrieves an order by id.
 	 * 
@@ -90,8 +90,8 @@ public interface ApplicationOrderService {
 	
 	List<RetrievedOrderContentDTO> getOrderContent(Long orderId);
 	
-	RetrievedOrderDTO pinOrder(Long id);
-	RetrievedOrderDTO unpinOrder(Long id);
+	RetrievedOrderDTO pinOrder(Long orderId, Long userId);
+	RetrievedOrderDTO unpinOrder(Long orderId, Long userId);
 	
 	Double computeContentPrice(Long productId, Integer amount);
 	
@@ -100,4 +100,8 @@ public interface ApplicationOrderService {
 	CompletedOrdersReportDTO getCompletedOrdersReport();
 
 	NewOrdersReportDTO getNewOrdersReport();
+
+	RetrievedOrderDTO assignOrderToUser(Long orderId, Long userId);
+
+	RetrievedOrderDTO removeAssignedOrderFromUser(Long orderId, Long userId);
 }

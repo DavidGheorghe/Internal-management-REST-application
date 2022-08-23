@@ -31,8 +31,6 @@ public interface ApplicationOrderRepository extends JpaRepository<ApplicationOrd
 	@Query("Select o FROM ApplicationOrder o WHERE o.status = ?1")
 	Page<ApplicationOrder> findByStatus(ApplicationOrderStatus status, Pageable pageable);
 	
-	List<ApplicationOrder> findByIsPinnedTrue();
-	
 	@Query(value = "SELECT count(*) FROM internalmanagement.orders o where o.due_date between now() and date_add(now(), interval 7 day)", 
 			nativeQuery = true)
 	Integer getNumberOfDueOrdersInOneWeek();

@@ -21,7 +21,7 @@ import com.dvd.exception.ResourceNotFoundException;
 */
 public enum ApplicationRole {
 	EMPLOYEE(1, EnumSet.of(ORDER_READ, PRODUCT_READ, USER_READ_OWN)),
-	MANAGER(2, EnumSet.complementOf(EnumSet.of(USER_READ, USER_WRITE))),
+	SUPERVISOR(2, EnumSet.complementOf(EnumSet.of(USER_READ, USER_WRITE))),
 	ADMIN(3, EnumSet.of(USER_WRITE, USER_READ));
 	
 	private Integer id;

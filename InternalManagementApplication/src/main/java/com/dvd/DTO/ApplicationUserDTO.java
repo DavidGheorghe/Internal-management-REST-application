@@ -16,6 +16,5 @@ import lombok.Data;
 public class ApplicationUserDTO {
 	private Long id;
 	private String username;
-	private Set<ApplicationPrivilege> privileges;
 	private Set<ApplicationRole> roles;
 }

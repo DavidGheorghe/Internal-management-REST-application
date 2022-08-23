@@ -1,8 +1,8 @@
 package com.dvd.entity;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
@@ -17,12 +17,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.dvd.entity.order.ApplicationOrder;
 
 import lombok.Data;
 import lombok.Getter;
@@ -48,12 +51,17 @@ public class ApplicationUser {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<ApplicationTodo> todos;
 	
-	@Column(name = "privilege")
-	@ElementCollection(targetClass = ApplicationPrivilege.class, fetch = FetchType.EAGER)
-	@CollectionTable(name = "user_privilege", joinColumns = @JoinColumn(name = "user_id"))
-	@Enumerated(EnumType.STRING)
-	private Set<ApplicationPrivilege> privileges;
-		
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinTable(
+			name="user_pinned_order",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns  = @JoinColumn(name = "order_id")
+			)
+	private List<ApplicationOrder> pinnedOrders;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ApplicationOrder> assignedOrders;
+	
 	@Column(name = "role")
 	@ElementCollection(targetClass = ApplicationRole.class, fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
@@ -64,7 +72,6 @@ public class ApplicationUser {
 		this.username = username;
 		this.password = password;
 		this.roles = roles;
-		this.privileges = getPrivilegesFromRoles();
 	}
 	
 	public ApplicationUser() {
@@ -82,23 +89,19 @@ public class ApplicationUser {
 		return authorities;
 	}
 	
-	/**
-	 * Adds a new privilege to a user instance.
-	 * 
-	 * @param privilege - the new privilege
-	 */
-	public void addPrivilege(ApplicationPrivilege privilege) {
-		this.getPrivileges().add(privilege);
+	public void addPinnedOrder(ApplicationOrder order) {
+		pinnedOrders.add(order);
 	}
 	
-	/**
-	 * Get the privileges from each role that the user have. Note: the user can have some privileges that the role does not have.
-	 * 
-	 * @return a set of privileges.
-	 */
-	private Set<ApplicationPrivilege> getPrivilegesFromRoles() {
-		Set<ApplicationPrivilege> privileges = new HashSet<>();
-		this.getRoles().stream().map(role -> privileges.addAll(role.getPrivileges())).collect(Collectors.toSet());
-		return privileges;
+	public void removePinnedOrder(ApplicationOrder order) {
+		pinnedOrders.remove(order);
+	}
+	
+	public void addAssignedOrder(ApplicationOrder order) {
+		assignedOrders.add(order);
+	}
+	
+	public void removeAssignedOrder(ApplicationOrder order) {
+		assignedOrders.remove(order);
 	}
 }

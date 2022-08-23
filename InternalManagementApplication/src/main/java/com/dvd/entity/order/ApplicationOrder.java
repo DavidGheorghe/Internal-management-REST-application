@@ -2,6 +2,7 @@ package com.dvd.entity.order;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -14,12 +15,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.dvd.entity.ApplicationCustomer;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.dvd.entity.ApplicationUser;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -48,10 +50,15 @@ public class ApplicationOrder {
 	private LocalDateTime completionDate;
 	private LocalDate dueDate;
 	private String details;
-	private boolean isPinned = false;
+
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ApplicationUser> pinnedTo;
 	
-	@JsonIgnore
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private ApplicationUser user;
+	
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "customer_id", nullable = false)
 	private ApplicationCustomer customer;
 	
@@ -73,6 +80,34 @@ public class ApplicationOrder {
 			completionDate = LocalDateTime.now();
 		}
 		this.status = status;
+	}
+	
+	public void pinToUser(ApplicationUser user) {
+		if (pinnedTo.contains(user) == false) {
+			pinnedTo.add(user);
+			user.addPinnedOrder(this);
+		}
+	}
+	
+	public void unpinFromUser(ApplicationUser user) {
+		if (pinnedTo.contains(user)) {
+			pinnedTo.remove(user);
+			user.removePinnedOrder(this);
+		}
+	}
+	
+	public void assignToUser(ApplicationUser user) {
+		if (user.equals(this.user) == false) {
+			this.user = user;
+			
+		}
+	}
+	
+	public void removeAssignedFromUser(ApplicationUser user) {
+		if (user.equals(this.user)) {
+			this.user = null;
+			
+		}
 	}
 	
 	public String toString() {

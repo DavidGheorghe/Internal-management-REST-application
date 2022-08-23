@@ -1,11 +1,13 @@
 package com.dvd.service.impl;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +45,8 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	private final ApplicationUserRepository userRepository; 
 	private final PasswordEncoder passwordEncoder;
 	private final ModelMapper mapper;
+	@Value("${application.user.initial-password}")
+	public String initialPassword;
 	
 	@Override
 	public ApplicationUserDTO createUser(CreateUserDTO createUserDTO, Principal principal) {
@@ -50,7 +54,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		if (userRepository.existsByUsername(username)) {
 			throw new UsernameTakenException(username);
 		}
-		String password = passwordEncoder.encode(createUserDTO.getPassword());
+		String password = passwordEncoder.encode(initialPassword);
 		Set<Integer> rolesIds = createUserDTO.getRolesIds();
 		ApplicationUser newUser = new ApplicationUser(username, password, ApplicationRole.getRolesFromIds(rolesIds));
 		userRepository.save(newUser);
@@ -83,6 +87,14 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	}
 
 	@Override
+	public List<ApplicationUserDTO> getAllUsers() {
+		List<ApplicationUser> users = userRepository.findAll();
+		List<ApplicationUserDTO> usersDTO = new ArrayList<>();
+		users.stream().forEach(user -> usersDTO.add(mapper.map(user, ApplicationUserDTO.class)));
+		return usersDTO;
+	}
+	
+	@Override
 	public ApplicationUserDTO getUserById(Long id) {
 		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
 		return mapper.map(user, ApplicationUserDTO.class);
@@ -99,32 +111,6 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 
-	@Override
-	public ApplicationUserDTO addPrivileges(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
-		if (userDTO.getPrivileges() != null) {
-			user.getPrivileges().addAll(userDTO.getPrivileges());
-		}
-		userRepository.save(user);
-		return mapper.map(user, ApplicationUserDTO.class);
-	}
-
-	@Override
-	public ApplicationUserDTO removePrivileges(Long id, UpdateUserDTO userDTO) {
-		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
-		if (userDTO.getPrivileges() != null) {
-			for (ApplicationPrivilege newPrivilege: userDTO.getPrivileges()) {
-				if (rolesContainsPrivilege(user.getRoles(), newPrivilege)) {
-					throw new RemovePrivilegeFromUserException(newPrivilege.name(), user.getUsername());
-				} else {
-					user.getPrivileges().remove(newPrivilege);
-				}
-			}			
-		}
-		userRepository.save(user);
-		return mapper.map(user, ApplicationUserDTO.class);
-	}
-	
 	@Override
 	public ApplicationUserDTO addRoles(Long id, UpdateUserDTO userDTO) {
 		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
@@ -154,14 +140,22 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		}
 		if (!passwordEncoder.matches(oldPassword, existingPassword)) {
 			throw new RuntimeException("Old password doesn't match with the current password");
-		}		
+		}
 		user.setPassword(passwordEncoder.encode(newPassword));
 		userRepository.save(user);
 		return mapper.map(user, ApplicationUserDTO.class);
 	}
 		
+	@Override
+	public List<ApplicationUserDTO> getAllUsersByRole(ApplicationRole role) {
+		List<ApplicationUser> users = userRepository.findByRolesContains(role);
+		List<ApplicationUserDTO> usersDTO = new ArrayList<>();
+		users.stream().forEach(employee -> usersDTO.add(mapper.map(employee, ApplicationUserDTO.class)));
+		return usersDTO;
+	}
+	
 	/**
-	 * Changes the username of a specific user. If the username it istaken or if it is the same username as before an exception is thrown.
+	 * Changes the username of a specific user. If the username is taken or if is the same username as before an exception is thrown.
 	 * 
 	 * @param updatedUser - the user who's username is changed.
 	 * @param newUsername - the new username.

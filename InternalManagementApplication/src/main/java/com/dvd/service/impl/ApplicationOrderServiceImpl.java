@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.dvd.DTO.ApplicationCustomerDTO;
+import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderContentDTO;
 import com.dvd.DTO.order.ApplicationOrderDTO;
@@ -25,6 +27,8 @@ import com.dvd.DTO.reports.CompletedOrdersReportDTO;
 import com.dvd.DTO.reports.NewOrdersReportDTO;
 import com.dvd.entity.ApplicationColor;
 import com.dvd.entity.ApplicationCustomer;
+import com.dvd.entity.ApplicationRole;
+import com.dvd.entity.ApplicationUser;
 import com.dvd.entity.order.ApplicationOrder;
 import com.dvd.entity.order.ApplicationOrderContent;
 import com.dvd.entity.order.ApplicationOrderStatus;
@@ -32,7 +36,7 @@ import com.dvd.entity.product.ApplicationProduct;
 import com.dvd.repository.ApplicationColorRepository;
 import com.dvd.repository.ApplicationCustomerRepository;
 import com.dvd.repository.ApplicationProductRepository;
-import com.dvd.repository.order.ApplicationOrderContentRepository;
+import com.dvd.repository.ApplicationUserRepository;
 import com.dvd.repository.order.ApplicationOrderRepository;
 import com.dvd.service.ApplicationOrderService;
 import com.dvd.utils.UtilsMethods;
@@ -48,7 +52,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 	private final ApplicationOrderRepository orderRepository;
-	private final ApplicationOrderContentRepository orderContentRepository;
+	private final ApplicationUserRepository userRepository;
 	private final ApplicationCustomerRepository customerRepository;
 	private final ApplicationColorRepository colorRepository;
 	private final ApplicationProductRepository productRepository;
@@ -71,28 +75,28 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		addContent(newOrder, orderDTO.getContent());
 		
 		orderRepository.save(newOrder);
-		RetrievedOrderDTO newOrderDTO = mapper.map(newOrder, RetrievedOrderDTO.class);
+		RetrievedOrderDTO newOrderDTO = mapOrderToDTOWithoutPinned(newOrder);
 		return newOrderDTO;
 	}
 
 	@Override
 	public RetrievedOrderDTO deleteById(Long id) {
 		ApplicationOrder deletedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
-		RetrievedOrderDTO deletedOrderDTO = mapper.map(deletedOrder, RetrievedOrderDTO.class);
+		RetrievedOrderDTO deletedOrderDTO = mapOrderToDTOWithoutPinned(deletedOrder);
 		orderRepository.deleteById(id);
 		return deletedOrderDTO;
 	}
 
 	@Override
 	public GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy,
-			String sortDir) {
+			String sortDir, Long userId) {
 		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 		Page<ApplicationOrder> orders = orderRepository.findAll(pageable);
 		List<ApplicationOrder> listOfOrders = orders.getContent();
 		List<RetrievedOrderDTO> content = listOfOrders
 													.stream()
-													.map(order -> mapper.map(order, RetrievedOrderDTO.class))
+													.map(order -> mapOrderToDTO(order, userId))
 													.collect(Collectors.toList());
 		GetResourcesResponse<RetrievedOrderDTO> response = new GetResourcesResponse<>();
 		response.setGetResourcesResponseFields(content, orders);
@@ -101,14 +105,14 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 
 	@Override
 	public GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize,
-			String sortBy, String sortDir) {
+			String sortBy, String sortDir, Long userId) {
 		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 		Page<ApplicationOrder> orders = orderRepository.findByIdOrCustomerNameAndCompany(keyword, pageable);
 		List<ApplicationOrder> listOfOrders = orders.getContent();
 		List<RetrievedOrderDTO> content = listOfOrders
 													.stream()
-													.map(order -> mapper.map(order, RetrievedOrderDTO.class))
+													.map(order -> mapOrderToDTO(order, userId))
 													.collect(Collectors.toList());
 		GetResourcesResponse<RetrievedOrderDTO> response = new GetResourcesResponse<>();
 		response.setGetResourcesResponseFields(content, orders);
@@ -117,35 +121,40 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 	
 	@Override
 	public GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo,
-			int pageSize, String sortBy, String sortDir) {
+			int pageSize, String sortBy, String sortDir, Long userId) {
 		ApplicationOrderStatus statusFilter = ApplicationOrderStatus.getStatusById(statusId);
 		Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
 		Page<ApplicationOrder> orders = keyword.isEmpty() ? 
 				orderRepository.findByStatus(statusFilter, pageable) : 
-				orderRepository.findByIdOrCustomerNameAndCompanyAndStatus(keyword, statusFilter, pageable) ;
+				orderRepository.findByIdOrCustomerNameAndCompanyAndStatus(keyword, statusFilter, pageable);
 		List<ApplicationOrder> listOfOrders = orders.getContent();
 		List<RetrievedOrderDTO> content = listOfOrders
-													.stream()
-													.map(order -> mapper.map(order, RetrievedOrderDTO.class))
-													.collect(Collectors.toList());
+											.stream()
+											.map(order -> mapOrderToDTO(order, userId))
+											.collect(Collectors.toList());
 		GetResourcesResponse<RetrievedOrderDTO> response = new GetResourcesResponse<>();
 		response.setGetResourcesResponseFields(content, orders);
 		return response;
 	}
 	
 	@Override
-	public List<RetrievedOrderDTO> getPinnedOrders() {
-		List<RetrievedOrderDTO> pinnedOrdersDTO = new ArrayList<>();
-		List<ApplicationOrder> pinnedOrders = orderRepository.findByIsPinnedTrue();
-		pinnedOrders.stream().forEach(order -> pinnedOrdersDTO.add(mapper.map(order, RetrievedOrderDTO.class)));
-		return pinnedOrdersDTO;
+	public List<RetrievedOrderDTO> getDashboardOrders(Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		List<RetrievedOrderDTO> ordersDTO = new ArrayList<>();
+		List<ApplicationOrder> assignedOrders = user.getAssignedOrders();
+		assignedOrders.stream().forEach(order -> ordersDTO.add(mapOrderToDTO(order, userId)));
+		if (user.getRoles().contains(ApplicationRole.SUPERVISOR)) {
+			List<ApplicationOrder> pinnedOrders = user.getPinnedOrders();
+			pinnedOrders.stream().forEach(order -> ordersDTO.add(mapOrderToDTO(order, userId)));
+		}
+		return ordersDTO;
 	}
 
 	@Override
 	public RetrievedOrderDTO getOrderById(Long id) {
 		ApplicationOrder fetchedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
-		return mapper.map(fetchedOrder, RetrievedOrderDTO.class);
+		return mapOrderToDTOWithoutPinned(fetchedOrder);
 	}
 
 	@Override
@@ -154,7 +163,7 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		ApplicationOrderStatus newStatus = ApplicationOrderStatus.getStatusById(statusId);
 		updatedOrder.setStatus(newStatus);
 		orderRepository.save(updatedOrder);
-		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+		return mapOrderToDTOWithoutPinned(updatedOrder);
 	}
 
 	@Override
@@ -179,25 +188,34 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		}
 		// TODO: update contents
 		orderRepository.save(updatedOrder);
-		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+		return mapOrderToDTOWithoutPinned(updatedOrder);
 	}
 
 	@Override
-	public RetrievedOrderDTO pinOrder(Long id) {
-		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
-		updatedOrder.setPinned(true);
-		orderRepository.save(updatedOrder);
-		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+	public RetrievedOrderDTO pinOrder(Long orderId, Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		order.pinToUser(user);
+		orderRepository.save(order);
+		return mapOrderToDTO(order, userId);
 	}
 
 	@Override
-	public RetrievedOrderDTO unpinOrder(Long id) {
-		ApplicationOrder updatedOrder = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, id, "Order");
-		updatedOrder.setPinned(false);
-		orderRepository.save(updatedOrder);
-		return mapper.map(updatedOrder, RetrievedOrderDTO.class);
+	public RetrievedOrderDTO unpinOrder(Long orderId, Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		order.unpinFromUser(user);
+		orderRepository.save(order);
+		return mapOrderToDTO(order, userId);
 	}
 
+	public boolean isOrderPinned(Long orderId, Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		boolean isPinned = order.getPinnedTo().contains(user);
+		return isPinned;
+	}
+	
 	@Override
 	public Double computeContentPrice(Long productId, Integer amount) {
 		ApplicationProduct product = UtilsMethods.getResourceByIdOrElseThrow(productRepository, productId, "Product");
@@ -213,7 +231,6 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		Set<ApplicationOrderContent> finalContent = new HashSet<ApplicationOrderContent>();
 		for (ApplicationOrderContentDTO contentDTO : contentSet) {
 			ApplicationOrderContent content = createOrderContentFromDTO(contentDTO);
-//			orderContentRepository.save(content);
 			finalContent.add(content);
 		}
 		order.setContent(finalContent);
@@ -317,7 +334,7 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 			order.setDueDate(newDueDate);
 		}
 		orderRepository.save(order);
-		return mapper.map(order, RetrievedOrderDTO.class);
+		return mapOrderToDTOWithoutPinned(order);
 	}
 	
 	@Override
@@ -380,5 +397,57 @@ public class ApplicationOrderServiceImpl implements ApplicationOrderService {
 		report.setNumberOfNewOrdersOneWeekAgo(oneWeekAgo);
 		
 		return report;
+	}
+	
+	@Override
+	public RetrievedOrderDTO assignOrderToUser(Long orderId, Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		order.assignToUser(user);
+		orderRepository.save(order);
+		return mapOrderToDTOWithoutPinned(order);
+	}
+	
+	@Override
+	public RetrievedOrderDTO removeAssignedOrderFromUser(Long orderId, Long userId) {
+		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		ApplicationOrder order = UtilsMethods.getResourceByIdOrElseThrow(orderRepository, orderId, "Order");
+		order.removeAssignedFromUser(user);
+		orderRepository.save(order);
+		return mapOrderToDTOWithoutPinned(order);
+	}
+	
+	
+	private RetrievedOrderDTO mapOrderToDTO(ApplicationOrder order, Long userId) {
+		RetrievedOrderDTO orderDTO = new RetrievedOrderDTO();
+		
+		orderDTO.setCustomer(mapper.map(order.getCustomer(), ApplicationCustomerDTO.class));
+		orderDTO.setDetails(order.getDetails());
+		orderDTO.setDueDate(order.getDueDate());
+		orderDTO.setEntryDate(order.getEntryDate());
+		orderDTO.setId(order.getId());
+		orderDTO.setStatus(order.getStatus());
+		if (order.getUser() != null) {
+			orderDTO.setAssignee(mapper.map(order.getUser(), ApplicationUserDTO.class));
+		}
+		boolean pinned = isOrderPinned(orderDTO.getId(), userId);
+		orderDTO.setPinned(pinned);
+		
+		return orderDTO;
+	}
+	
+	private RetrievedOrderDTO mapOrderToDTOWithoutPinned(ApplicationOrder order) {
+		RetrievedOrderDTO orderDTO = new RetrievedOrderDTO();
+		
+		orderDTO.setCustomer(mapper.map(order.getCustomer(), ApplicationCustomerDTO.class));
+		orderDTO.setDetails(order.getDetails());
+		orderDTO.setDueDate(order.getDueDate());
+		orderDTO.setEntryDate(order.getEntryDate());
+		orderDTO.setId(order.getId());
+		orderDTO.setStatus(order.getStatus());
+		if (order.getUser() != null) {
+			orderDTO.setAssignee(mapper.map(order.getUser(), ApplicationUserDTO.class));
+		}
+		return orderDTO;
 	}
 }

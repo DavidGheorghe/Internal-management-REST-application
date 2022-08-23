@@ -25,7 +25,9 @@ public class ApplicationProductPrices {
 	private Double computeFinalPrice() {
 		DecimalFormat df = new DecimalFormat("0.00");
 		Double finalPrice = priceWithoutVAT + ( ApplicationConstants.VAT / 100.0 ) * priceWithoutVAT;
-		return Double.valueOf(df.format(finalPrice));
+		String formattedFinalPriceLocale = df.format(finalPrice);
+		String formattedFinalPrice = formattedFinalPriceLocale.replace(",", ".");
+		return Double.valueOf(formattedFinalPrice);
 	}
 	
 	public ApplicationProductPrices(Double productionCost, Double priceWithoutVAT) {

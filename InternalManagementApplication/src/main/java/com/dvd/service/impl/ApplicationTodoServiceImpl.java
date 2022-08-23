@@ -40,7 +40,6 @@ public class ApplicationTodoServiceImpl implements ApplicationTodoService {
 		
 		todoRepository.save(newTodo);
 		return mapper.map(newTodo, ApplicationTodoDTO.class);
-		
 	}
 
 	@Override

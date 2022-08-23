@@ -32,6 +32,8 @@ public class JwtUtils {
 	private String tokenPrefix;
 	@Value("${application.jwt.access-token-time-expiration-hours}")
 	private Integer accessTokenTimeExpirationHours;
+	@Value("${application.jwt.access-token-time-expiration-days}")
+	private Integer accessTokenTimeExpirationDays;
 	@Value("${application.jwt.refresh-token-time-expiration-days}")
 	private Integer refreshTokenTimeExpirationDays;
 		
@@ -111,7 +113,7 @@ public class JwtUtils {
 	}
 	
 	public long getAccessTokenExpirationTime() {
-		return System.currentTimeMillis() + this.getAccessTokenTimeExpirationHours() * 60 * 60 * 1000; // System.currentTimeMillis() + 60 * 1000
+		return System.currentTimeMillis() + this.getAccessTokenTimeExpirationDays() * 24 * 60 * 60 * 1000;
 	}
 	
 	public long getRefreshTokenExpirationTime() {

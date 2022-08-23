@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.dvd.DTO.ApplicationUserDTO;
 import com.dvd.DTO.GetResourcesResponse;
 import com.dvd.DTO.order.ApplicationOrderDTO;
 import com.dvd.DTO.order.RetrievedOrderContentDTO;
@@ -23,6 +25,7 @@ import com.dvd.DTO.reports.ActiveAndDueOrdersReportsDTO;
 import com.dvd.DTO.reports.CompletedOrdersReportDTO;
 import com.dvd.DTO.reports.NewOrdersReportDTO;
 import com.dvd.service.ApplicationOrderService;
+import com.dvd.service.ApplicationUserService;
 import com.dvd.utils.ApplicationConstants;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +42,7 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping(ApplicationConstants.API_ORDER_ROOT)
 public class ApplicationOrderController {
 	private final ApplicationOrderService orderService;
+	private final ApplicationUserService userService;
 	
 	@PostMapping
 	public ResponseEntity<RetrievedOrderDTO> createOrder(@RequestBody ApplicationOrderDTO orderDTO, Principal principal) {
@@ -71,8 +75,10 @@ public class ApplicationOrderController {
 			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrders(pageNo, pageSize, sortBy, sortDir);
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+			@AuthenticationPrincipal String principal) {
+		Long userId = getUserIdFromPrincipal(principal);
+		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrders(pageNo, pageSize, sortBy, sortDir, userId);
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
 	
@@ -82,8 +88,10 @@ public class ApplicationOrderController {
 			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, pageNo, pageSize, sortBy, sortDir);
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+			@AuthenticationPrincipal String principal) {
+		Long userId = getUserIdFromPrincipal(principal);
+		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, pageNo, pageSize, sortBy, sortDir, userId);
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
 
@@ -94,14 +102,16 @@ public class ApplicationOrderController {
 			@RequestParam(value = "pageNo", defaultValue = ApplicationConstants.DEFAULT_PAGE_NUMBER, required = false) int pageNo,
 			@RequestParam(value = "pageSize", defaultValue = ApplicationConstants.DEFAULT_PAGE_SIZE, required = false) int pageSize,
 			@RequestParam(value = "sortBy", defaultValue = ApplicationConstants.DEFAULT_SORT_BY, required = false) String sortBy,
-			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir) {
-		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, statusId, pageNo, pageSize, sortBy, sortDir);
+			@RequestParam(value = "sortDir", defaultValue = ApplicationConstants.DEFAULT_SORT_DIRECTION, required = false) String sortDir,
+			@AuthenticationPrincipal String principal) {
+		Long userId = getUserIdFromPrincipal(principal);
+		GetResourcesResponse<RetrievedOrderDTO> orders = orderService.getAllOrdersFilteredBy(keyword, statusId, pageNo, pageSize, sortBy, sortDir, userId);
 		return new ResponseEntity<GetResourcesResponse<RetrievedOrderDTO>>(orders, HttpStatus.OK);
 	}
 	
-	@GetMapping("/pinned")
-	public ResponseEntity<List<RetrievedOrderDTO>> getAllPinnedOrders() {
-		List<RetrievedOrderDTO> pinnedOrders = orderService.getPinnedOrders();
+	@GetMapping("/dashboard/{userId}")
+	public ResponseEntity<List<RetrievedOrderDTO>> getDashboardOrders(@PathVariable Long userId) {
+		List<RetrievedOrderDTO> pinnedOrders = orderService.getDashboardOrders(userId);
 		return new ResponseEntity<List<RetrievedOrderDTO>>(pinnedOrders, HttpStatus.OK);
 	}
 	
@@ -110,28 +120,34 @@ public class ApplicationOrderController {
 		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrder(id, orderDTO);
 		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 	}
-//	
-//	@PutMapping("/customer/{orderId}/{customerId}")
-//	public ResponseEntity<RetrievedOrderDTO> updateOrderCustomer(@PathVariable Long orderId, @PathVariable Long customerId) {
-//		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrderCustomer(orderId, customerId);
-//		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
-//	}
+
 	@PutMapping("/status/{orderId}/{statusId}")
 	public ResponseEntity<RetrievedOrderDTO> updateOrderStatus(@PathVariable Long orderId, @PathVariable int statusId) {
 		RetrievedOrderDTO updatedOrderDTO = orderService.updateOrderStatus(orderId, statusId);
 		return new ResponseEntity<RetrievedOrderDTO>(updatedOrderDTO, HttpStatus.OK);
 	}
 	
-	// TODO change to patch
-	@PutMapping("/pin/{id}")
-	public ResponseEntity<RetrievedOrderDTO> pinOrder(@PathVariable Long id) {
-		RetrievedOrderDTO orderDTO = orderService.pinOrder(id);
+	@PutMapping("/pin/{orderId}/{userId}")
+	public ResponseEntity<RetrievedOrderDTO> pinOrder(@PathVariable Long orderId, @PathVariable Long userId) {
+		RetrievedOrderDTO orderDTO = orderService.pinOrder(orderId, userId);
 		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
 	}
 
-	@PutMapping("/unpin/{id}")
-	public ResponseEntity<RetrievedOrderDTO> unpinOrder(@PathVariable Long id) {
-		RetrievedOrderDTO orderDTO = orderService.unpinOrder(id);
+	@PutMapping("/unpin/{orderId}/{userId}")
+	public ResponseEntity<RetrievedOrderDTO> unpinOrder(@PathVariable Long orderId, @PathVariable Long userId) {
+		RetrievedOrderDTO orderDTO = orderService.unpinOrder(orderId, userId);
+		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
+	}
+	
+	@PutMapping("/assign/{orderId}/{userId}")
+	public ResponseEntity<RetrievedOrderDTO> assignOrderToUser(@PathVariable Long orderId, @PathVariable Long userId) {
+		RetrievedOrderDTO orderDTO = orderService.assignOrderToUser(orderId, userId);
+		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
+	}
+	
+	@PutMapping("/remove-assigned/{orderId}/{userId}")
+	public ResponseEntity<RetrievedOrderDTO> removeAssignedOrderFromUser(@PathVariable Long orderId, @PathVariable Long userId) {
+		RetrievedOrderDTO orderDTO = orderService.removeAssignedOrderFromUser(orderId, userId);
 		return new ResponseEntity<RetrievedOrderDTO>(orderDTO, HttpStatus.OK);
 	}
 	
@@ -158,9 +174,16 @@ public class ApplicationOrderController {
 		CompletedOrdersReportDTO ordersReport = orderService.getCompletedOrdersReport();
 		return new ResponseEntity<CompletedOrdersReportDTO>(ordersReport, HttpStatus.OK);
 	}
+	
 	@GetMapping("/reports/new")
 	public ResponseEntity<NewOrdersReportDTO> getNewOrdersReport() {
 		NewOrdersReportDTO ordersReport = orderService.getNewOrdersReport();
 		return new ResponseEntity<NewOrdersReportDTO>(ordersReport, HttpStatus.OK);
+	}
+	
+	private Long getUserIdFromPrincipal(String principalUsername) {
+		ApplicationUserDTO user = userService.getCurrentUser(principalUsername);
+		Long userId = user.getId();
+		return userId;
 	}
 }
