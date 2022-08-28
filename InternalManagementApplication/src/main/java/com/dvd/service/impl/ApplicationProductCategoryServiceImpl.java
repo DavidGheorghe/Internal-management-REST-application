@@ -34,7 +34,8 @@ public class ApplicationProductCategoryServiceImpl implements ApplicationProduct
 	
 	@Override
 	public ApplicationProductCategoryDTO createProductCategory(ApplicationProductCategoryDTO productCategoryDTO) {
-		ApplicationProductCategory newCategory = mapper.map(productCategoryDTO, ApplicationProductCategory.class);
+		ApplicationProductCategory newCategory = new ApplicationProductCategory();
+		newCategory.setCategoryName(productCategoryDTO.getCategoryName());
 		if (productCategoryRepository.existsByCategoryName(productCategoryDTO.getCategoryName())) {
 			throw new UniqueEntryException(productCategoryDTO.getCategoryName());
 		}

@@ -2,6 +2,7 @@ package com.dvd.entity;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,7 +13,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.dvd.entity.order.ApplicationOrder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -39,8 +39,7 @@ public class ApplicationCustomer {
 	private String billingAddress;
 	private String deliveryAddress;
 	
-	@JsonIgnore
-	@OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<ApplicationOrder> orders;
 	
 	public void addOrder(ApplicationOrder newOrder) {

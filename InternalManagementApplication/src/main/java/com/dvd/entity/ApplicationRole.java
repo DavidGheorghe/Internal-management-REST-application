@@ -1,14 +1,8 @@
 package com.dvd.entity;
 
-import static com.dvd.entity.ApplicationPrivilege.ORDER_READ;
-import static com.dvd.entity.ApplicationPrivilege.PRODUCT_READ;
-import static com.dvd.entity.ApplicationPrivilege.USER_READ;
-import static com.dvd.entity.ApplicationPrivilege.USER_READ_OWN;
-import static com.dvd.entity.ApplicationPrivilege.USER_WRITE;
-
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -20,33 +14,18 @@ import com.dvd.exception.ResourceNotFoundException;
 * @author David Gheorghe
 */
 public enum ApplicationRole {
-	EMPLOYEE(1, EnumSet.of(ORDER_READ, PRODUCT_READ, USER_READ_OWN)),
-	SUPERVISOR(2, EnumSet.complementOf(EnumSet.of(USER_READ, USER_WRITE))),
-	ADMIN(3, EnumSet.of(USER_WRITE, USER_READ));
+	EMPLOYEE(1),
+	SUPERVISOR(2),
+	ADMIN(3);
 	
 	private Integer id;
-	private EnumSet<ApplicationPrivilege> privileges;
 	
-	ApplicationRole(Integer id, EnumSet<ApplicationPrivilege> privileges) {
+	ApplicationRole(Integer id) {
 		this.id = id;
-		this.privileges = privileges;
 	}
 	
 	public Integer getId() {
 		return id;
-	}
-	
-	public EnumSet<ApplicationPrivilege> getPrivileges() {
-		return privileges;
-	}
-	
-	/**
-	 * Adds a privilege to a role instance.
-	 
-	 * @param privilege
-	 */
-	public void addPrivilegeToRole(ApplicationPrivilege privilege) {
-		this.privileges.add(privilege);
 	}
 
 	/**
@@ -55,19 +34,9 @@ public enum ApplicationRole {
 	 * @return a set of authorities.
 	 */
 	public Set<SimpleGrantedAuthority> getAuthorities() {
-		Set<SimpleGrantedAuthority> authorities = this.getPrivileges().stream().map(privilege -> new SimpleGrantedAuthority(privilege.name())).collect(Collectors.toSet());
+		Set<SimpleGrantedAuthority> authorities = new HashSet<>();
 		authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
 		return authorities;
-	}
-
-	/**
-	 * Checks if a role instance contains a certain privilege.
-	 * 
-	 * @param privilege - the privilege that is sought
-	 * @return true if the role contains the privilege, false otherwise.
-	 */
-	public boolean hasPrivilege(ApplicationPrivilege privilege) {		
-		return this.getPrivileges().contains(privilege);
 	}
 	
 	/**

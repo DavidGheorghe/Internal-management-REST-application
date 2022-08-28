@@ -7,6 +7,7 @@ import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.validator.constraints.Length;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -15,6 +16,7 @@ import lombok.Data;
 * @author David Gheorghe
 */
 @Data
+@AllArgsConstructor
 public class CreateUserDTO {
 	@NotBlank
 	@Length(min = 3, max = 20)
