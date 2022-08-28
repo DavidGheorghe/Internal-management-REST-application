@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 public class ApplicationTodoDTO {
 	Long id;
-	Long userId;
+	String username;
 	String text;
 	boolean isCompleted;
 }

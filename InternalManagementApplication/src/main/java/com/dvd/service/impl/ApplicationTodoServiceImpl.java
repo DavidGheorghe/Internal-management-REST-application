@@ -34,8 +34,8 @@ public class ApplicationTodoServiceImpl implements ApplicationTodoService {
 		ApplicationTodo newTodo = new ApplicationTodo();
 		newTodo.setText(todoDTO.getText());
 		
-		Long userId = todoDTO.getUserId();
-		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+		String username = todoDTO.getUsername();
+		ApplicationUser user = userRepository.findByUsername(username);
 		newTodo.setUser(user);
 		
 		todoRepository.save(newTodo);
