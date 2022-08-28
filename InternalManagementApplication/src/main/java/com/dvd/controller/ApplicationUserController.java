@@ -46,7 +46,7 @@ public class ApplicationUserController {
 	
 	@PostMapping
 	public ResponseEntity<ApplicationUserDTO> createUser(@Valid @RequestBody CreateUserDTO createUserDTO, Principal principal) {
-		ApplicationUserDTO createdUser = userService.createUser(createUserDTO, principal);
+		ApplicationUserDTO createdUser = userService.createUser(createUserDTO);
 		if (log.isInfoEnabled()) {
 			log.info("User " + principal.getName() + " created new user '" + createdUser.getUsername() + "'.");
 		}
@@ -92,9 +92,9 @@ public class ApplicationUserController {
 		return new ResponseEntity<ApplicationUserDTO>(updatedUser, OK);
 	}
 	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<ApplicationUserDTO> deleteUserById(@Min(0) @PathVariable Long id, Principal principal) {
-		ApplicationUserDTO deletedUser = userService.deleteUserById(id);
+	@DeleteMapping("/{username}")
+	public ResponseEntity<ApplicationUserDTO> deleteUserByUsername(@PathVariable String username, Principal principal) {
+		ApplicationUserDTO deletedUser = userService.deleteUserByUsername(username);
 		if (log.isInfoEnabled()) {
 			log.info("User " + principal.getName() + " deleted user '" + deletedUser.getUsername() + "'.");
 		}

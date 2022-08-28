@@ -21,7 +21,7 @@ public interface ApplicationUserService {
 	 * @param newUser - DTO object specifically for creating users.
 	 * @return The new user.
 	 */
-	ApplicationUserDTO createUser(CreateUserDTO newUser, Principal principal);
+	ApplicationUserDTO createUser(CreateUserDTO newUser);
 	
 	/**
 	 * Deletes the user that matches the @param id.
@@ -29,7 +29,7 @@ public interface ApplicationUserService {
 	 * @param id - the id of the user that must be deleted.
 	 * @return The deleted user.
 	 */
-	ApplicationUserDTO deleteUserById(Long id);
+	ApplicationUserDTO deleteUserByUsername(String username);
 	
 	/**
 	 * Returns the users. The response is based on pagination and sorting.
@@ -94,9 +94,22 @@ public interface ApplicationUserService {
 	 * @param username
 	 * @return
 	 */
-	ApplicationUserDTO getCurrentUser(String username);
+	ApplicationUserDTO getUserByUsername(String username);
 
+	/**
+	 * @return a list with all the users.
+	 */
 	List<ApplicationUserDTO> getAllUsers();
 
+	/**
+	 * @param role	- the role based on which the users are retrieved.
+	 * @return a list with filtered users.
+	 */
 	List<ApplicationUserDTO> getAllUsersByRole(ApplicationRole role);
+	
+	/**
+	 * @param username - the username of the user who is questioned if it exists.
+	 * @return true if the user exists, false otherwise.
+	 */
+	Boolean existsByUsername(String username);
 }

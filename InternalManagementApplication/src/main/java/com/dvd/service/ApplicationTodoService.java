@@ -11,7 +11,7 @@ import com.dvd.DTO.ApplicationTodoDTO;
 */
 public interface ApplicationTodoService {
 	ApplicationTodoDTO createTodo(ApplicationTodoDTO todoDTO);
-	List<ApplicationTodoDTO> getAllTodosByUserId(Long userId);
+	List<ApplicationTodoDTO> getAllTodosByUser(String username);
 	ApplicationTodoDTO updateTodo(Long id, ApplicationTodoDTO todoDTO);
 	ApplicationTodoDTO deleteById(Long id);
 	ApplicationTodoDTO completeTodo(Long id);

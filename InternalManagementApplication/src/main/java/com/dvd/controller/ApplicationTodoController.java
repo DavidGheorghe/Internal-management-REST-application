@@ -36,9 +36,9 @@ public class ApplicationTodoController {
 		return new ResponseEntity<ApplicationTodoDTO>(newTodo, HttpStatus.CREATED);
 	}
 	
-	@GetMapping("/{userId}")
-	public ResponseEntity<List<ApplicationTodoDTO>> getAllTodosByUserId(@PathVariable Long userId) {
-		List<ApplicationTodoDTO> todos = todoService.getAllTodosByUserId(userId);
+	@GetMapping("/{username}")
+	public ResponseEntity<List<ApplicationTodoDTO>> getAllTodosByUserId(@PathVariable String username) {
+		List<ApplicationTodoDTO> todos = todoService.getAllTodosByUser(username);
 		return new ResponseEntity<List<ApplicationTodoDTO>>(todos, HttpStatus.OK);
 	}
 	

@@ -49,7 +49,7 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	public String initialPassword;
 	
 	@Override
-	public ApplicationUserDTO createUser(CreateUserDTO createUserDTO, Principal principal) {
+	public ApplicationUserDTO createUser(CreateUserDTO createUserDTO) {
 		String username = createUserDTO.getUsername();
 		if (userRepository.existsByUsername(username)) {
 			throw new UsernameTakenException(username);
@@ -62,10 +62,10 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 	}
 
 	@Override
-	public ApplicationUserDTO deleteUserById(Long id) {
-		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, id, "User");
+	public ApplicationUserDTO deleteUserByUsername(String username) {
+		ApplicationUser user =  userRepository.findByUsername(username);
 		ApplicationUserDTO deletedUser = mapper.map(user, ApplicationUserDTO.class);
-		userRepository.deleteById(id);
+		userRepository.deleteById(user.getId());
 		return deletedUser;
 	}
 
@@ -171,27 +171,14 @@ public class ApplicationUserServiceImpl implements ApplicationUserService {
 		updatedUser.setUsername(newUsername);
 	}
 
-	/**
-	 * Checks if a set of roles have a specific privilege.
-	 * 
-	 * @param roles - the set of roles that is being searched in.
-	 * @param privilege - the searched privilege.
-	 * @return true if the roles contains the privilege, false otherwise.
-	 */
-	private boolean rolesContainsPrivilege(Set<ApplicationRole> roles, ApplicationPrivilege privilege) {		
-		boolean contains = false;
-		for (ApplicationRole role: roles) {
-			if (role.hasPrivilege(privilege)) {
-				contains = true;
-				break;
-			}
-		}
-		return contains;
-	}
-
 	@Override
-	public ApplicationUserDTO getCurrentUser(String username) {
-		ApplicationUser currentUser = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException(username));
+	public ApplicationUserDTO getUserByUsername(String username) {
+		ApplicationUser currentUser = userRepository.findByUsername(username);
 		return mapper.map(currentUser, ApplicationUserDTO.class);
+	}
+	
+	@Override
+	public Boolean existsByUsername(String username) {
+		return userRepository.existsByUsername(username);
 	}
 }

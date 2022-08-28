@@ -42,7 +42,7 @@ public interface ApplicationOrderService {
 	 * @param sortDir 	- sorting direction  (ASC or DESC).
 	 * @return A custom response with orders.
 	 */
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrders(int pageNo, int pageSize, String sortBy, String sortDir);
 	
 	/**
 	 * Returns the orders which match a specific keyword. The filtration is done on the customer name and company. 
@@ -53,12 +53,30 @@ public interface ApplicationOrderService {
 	 * @param pageSize 	- page size.
 	 * @param sortBy 	- criteria for sorting.
 	 * @param sortDir 	- sorting direction  (ASC or DESC).
-	 * @return A custom response with orders.
+	 * @return
 	 */
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
-	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir, Long userId);
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int pageNo, int pageSize, String sortBy, String sortDir);
 	
-	List<RetrievedOrderDTO> getDashboardOrders(Long userId);
+	
+	/**
+	 * Returns the orders which match a specific keyword and a status. The filtration is done on the customer name and company. 
+	 * The response is based on pagination and sorting. Go to {@link com.dvd.utils.ApplicationConstants} class to see the parameters default values.
+	 * 
+	 * @param keyword	
+	 * @param statusId
+	 * @param pageNo
+	 * @param pageSize
+	 * @param sortBy
+	 * @param sortDir
+	 * @return
+	 */
+	GetResourcesResponse<RetrievedOrderDTO> getAllOrdersFilteredBy(String keyword, int statusId, int pageNo, int pageSize, String sortBy, String sortDir);
+	
+	/**
+	 * @return a list with the pinned orders and the assigned orders.
+	 */
+	List<RetrievedOrderDTO> getDashboardOrders();
+	
 	/**
 	 * Retrieves an order by id.
 	 * 
@@ -79,29 +97,79 @@ public interface ApplicationOrderService {
 	RetrievedOrderDTO updateOrderStatus(Long orderId, int statusId);
 	
 	/**
-	 * Updates the customer of an order.
+	 * Updates the due date of an order.
 	 * 
-	 * @param orderId 		- the id of the order being updated.
-	 * @param customerId 	- the id of the new customer.
+	 * @param orderId	 - the id of the order being updated.
+	 * @param newDueDate - the new due date.
 	 * @return The updated order as DTO.
 	 */
-//	RetrievedOrderDTO updateOrderCustomer(Long orderId, Long customerId);
 	RetrievedOrderDTO updateDueDate(Long orderId, String newDueDate);
 	
+	/**
+	 * Returns the content of a specific order.
+	 * 
+	 * @param orderId - the id of the order.
+	 * @return a list of DTOs with the content.
+	 */
 	List<RetrievedOrderContentDTO> getOrderContent(Long orderId);
 	
-	RetrievedOrderDTO pinOrder(Long orderId, Long userId);
-	RetrievedOrderDTO unpinOrder(Long orderId, Long userId);
+	/**
+	 * Pins an order to a specific user.
+	 * 
+	 * @param orderId	- the id of the pinned order.
+	 * @param username	- the username of the user who pinned the order.
+	 * @return a DTO with the pinned order.
+	 */
+	RetrievedOrderDTO pinOrder(Long orderId, String username);
+
+	/**
+	 * Unpins an order from a specific user.
+	 * 
+	 * @param orderId	- the id of the unpinned order.
+	 * @param username	- the username of the user who unpinned the order.
+	 * @return a DTO with the unpinned order.
+	 */
+	RetrievedOrderDTO unpinOrder(Long orderId, String username);
 	
-	Double computeContentPrice(Long productId, Integer amount);
+	/**
+	 * Computes the final price of an item content. 
+	 * 
+	 * @param productId	- the id of the product being computed for.
+	 * @param amount	- the amount of products.
+	 * @return the final price of the item.
+	 */
+	Double computeContentItemPrice(Long productId, Integer amount);
 	
-	ActiveAndDueOrdersReportsDTO getOrdersReports();
+	/**
+	 * @return a DTO with the number of active orders and the number of orders which are due in a week.
+	 */
+	ActiveAndDueOrdersReportsDTO getActiveAndDueReports();
 	
+	/**
+	 * @return a DTO with the number of completed orders in the last eight weeks.
+	 */
 	CompletedOrdersReportDTO getCompletedOrdersReport();
 
+	/**
+	 * @return a DTO with the number of new entered in the last eight weeks.
+	 */
 	NewOrdersReportDTO getNewOrdersReport();
 
-	RetrievedOrderDTO assignOrderToUser(Long orderId, Long userId);
+	/**
+	 * Assign an order to a specific user.
+	 * 
+	 * @param orderId	- the id of the order being assigned.
+	 * @param username	- the asignee's username.
+	 * @return 			the order assigned.
+	 */
+	RetrievedOrderDTO assignOrderToUser(Long orderId, String username);
 
-	RetrievedOrderDTO removeAssignedOrderFromUser(Long orderId, Long userId);
+	/**
+	 * Removes an order from a specific user.
+	 * 
+	 * @param orderId	- the id of the order being removed.
+	 * @param username	- the former asignee's username.
+	 * @return the order assigned.
+	 */
+	RetrievedOrderDTO removeAssignedOrderFromUser(Long orderId, String username);
 }

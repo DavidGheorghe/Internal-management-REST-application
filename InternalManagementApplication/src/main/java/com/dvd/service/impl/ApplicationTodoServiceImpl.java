@@ -43,8 +43,8 @@ public class ApplicationTodoServiceImpl implements ApplicationTodoService {
 	}
 
 	@Override
-	public List<ApplicationTodoDTO> getAllTodosByUserId(Long userId) {
-		ApplicationUser user = UtilsMethods.getResourceByIdOrElseThrow(userRepository, userId, "User");
+	public List<ApplicationTodoDTO> getAllTodosByUser(String username) {
+		ApplicationUser user = userRepository.findByUsername(username);
 		List<ApplicationTodoDTO> todosDTO = new ArrayList<>();
 		List<ApplicationTodo> todos = user.getTodos();
 		todos.stream().forEach(todo -> todosDTO.add(mapper.map(todo, ApplicationTodoDTO.class)));
