@@ -1,6 +1,5 @@
 package com.dvd.security;
 
-import static java.util.Arrays.stream;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,18 +7,17 @@ import java.util.Collection;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.dvd.exception.LoginFailedException;
 import com.dvd.jwt.JwtUtils;
 import com.dvd.utils.ApplicationConstants;
 
@@ -38,36 +36,52 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		if (request.getServletPath().equals(ApplicationConstants.AUTH_LOGIN) || request.getServletPath().equals(ApplicationConstants.AUTH_REFRESH_TOKEN)) {
+		String path = request.getServletPath();
+		if (path.equals(ApplicationConstants.AUTH_LOGIN) || path.equals(ApplicationConstants.AUTH_REFRESH_TOKEN)) {
 			filterChain.doFilter(request, response);
 		} else {
-			String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-			if (authorizationHeader != null && authorizationHeader.startsWith(ApplicationConstants.JWT_AUTHORIZATION_PREFIX)) {
-				try {
-					String token = authorizationHeader.substring(ApplicationConstants.JWT_AUTHORIZATION_PREFIX.length());
-					DecodedJWT decodedJWT = jwtConfig.getDecodedToken(token);
+			processCookie(request, response, filterChain);
+		}
+	}
 
-					String username = decodedJWT.getSubject();
-					String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+	private void processCookie(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-					Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-					stream(roles).forEach(role -> {
-						authorities.add(new SimpleGrantedAuthority(role));
-					});
-
-					UsernamePasswordAuthenticationToken authenticationToken = 
-							new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-					filterChain.doFilter(request, response);
-				} catch (JWTVerificationException e) {
-					response.setHeader("Error", e.getMessage());
-					response.setStatus(HttpStatus.FORBIDDEN.value());
-					throw new JWTVerificationException(e.getMessage());
+		Cookie[] cookies = request.getCookies();
+		Cookie jwtCookie = null;
+		if (cookies != null) {
+			if (cookies.length > 0) {
+				for (Cookie cookie : cookies) {
+					if (cookie.getName().equals("access-token")) {
+						jwtCookie = cookie;
+						break;
+					}
 				}
-			} else {
-				filterChain.doFilter(request, response);
 			}
+		}
+		
+		if (jwtCookie != null && jwtCookie.getValue().isEmpty() == false) {
+			try {
+				String token = jwtCookie.getValue();
+				DecodedJWT decodedJWT = jwtConfig.getDecodedToken(token);
+
+				String username = decodedJWT.getSubject();
+				String[] roles = decodedJWT.getClaim("roles").asArray(String.class);
+
+				Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+				for (String role : roles) {
+					authorities.add(new SimpleGrantedAuthority(role));
+				}
+
+				UsernamePasswordAuthenticationToken authenticationToken = 
+						new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+				filterChain.doFilter(request, response);
+			} catch (Exception e) {
+				throw new LoginFailedException(e.getMessage());
+			} 
+		} else {
+			filterChain.doFilter(request, response);
 		}
 	}
 }

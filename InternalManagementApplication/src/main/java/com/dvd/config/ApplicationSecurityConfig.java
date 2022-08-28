@@ -1,6 +1,7 @@
 package com.dvd.config;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import com.dvd.jwt.JwtUtils;
 import com.dvd.security.CustomAuthenticationFilter;
@@ -49,8 +49,10 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager(), jwtConfig);
 		CustomAuthorizationFilter customAuthorizationFilter = new CustomAuthorizationFilter(jwtConfig);
+		customAuthenticationFilter.setFilterProcessesUrl(ApplicationConstants.AUTH_LOGIN);
 		http
-			.cors().and()
+			.cors()
+			.and()
 			.csrf().disable()
 			.exceptionHandling()
 			.authenticationEntryPoint(authenticationEntryPoint)
@@ -61,8 +63,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 				.addFilter(customAuthenticationFilter)
 				.addFilterBefore(customAuthorizationFilter, CustomAuthenticationFilter.class)
 				.authorizeRequests().antMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
-//				.and()
-//				.authorizeRequests()
+				.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.anyRequest()
 			.authenticated();
 	}
@@ -79,17 +80,16 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowCredentials(true);
-		configuration.setAllowedOrigins(Arrays.asList(ApplicationConstants.CLIENT_SIDE_URL));
-		configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-		configuration.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
-		
-		configuration.setExposedHeaders(Arrays.asList("Access-Control-Expose-Headers", "Access-Control-Allow-Headers", "Authorization", "x-xsrf-token", "Access-Control-Allow-Headers", "Origin", "Accept", "X-Requested-With", 
-				"Content-Type", "Access-Control-Request-Method", "Access-Control-Request-Headers", "Access-Token", "Refresh-Token"));
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", configuration);
-		return source;
-	}
+    public CorsFilter corsFilter() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+        final CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of(ApplicationConstants.CLIENT_SIDE_URL));
+        config.setAllowedHeaders(Arrays.asList("Access-Control-Allow-Origin","Origin","ngsw-bypass", "Content-Type", "Accept","Authorization", "Access-Control-Allow-Headers"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 }

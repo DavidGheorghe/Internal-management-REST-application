@@ -32,40 +32,11 @@ import lombok.extern.log4j.Log4j2;
 *
 * @author David Gheorghe
 */
-@CrossOrigin(ApplicationConstants.CLIENT_SIDE_URL)
-@Log4j2
 @RequiredArgsConstructor
 @RestController
 @RequestMapping
 public class AuthController {
-	private final AuthenticationManager authenticationManager;
 	private final JwtUtils jwtUtils;
-	private final ApplicationUserRepository userRepository;
-	private final ApplicationUserService userService;
-	
-	@PostMapping(ApplicationConstants.AUTH_LOGIN)
-	public ResponseEntity<ApplicationUserDTO> logIn(@Valid @RequestBody UsernameAndPasswordAuthenticationRequest request) {
-		String username = request.getUsername();
-		String password = request.getPassword();
-		UsernamePasswordAuthenticationToken user = new UsernamePasswordAuthenticationToken(username, password);
-		Authentication authentication = authenticationManager.authenticate(user);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		
-		String uriStr = ServletUriComponentsBuilder.fromCurrentContextPath().path(ApplicationConstants.AUTH_LOGIN).toUriString();
-		
-		String accessToken = jwtUtils.generateAccessToken(authentication, uriStr);
-		String refreshToken = jwtUtils.generateRefreshToken(authentication, uriStr);
-		
-		HttpHeaders responseHeaders = this.getHeadersWithTokens(accessToken, refreshToken);
-		ApplicationUserDTO currentUser = userService.getCurrentUser(username);
-		
-		if (log.isInfoEnabled()) {
-			log.info("User '" + username + "' authenticated successfully.");
-		}
-		return ResponseEntity.ok()
-				.headers(responseHeaders)
-				.body(currentUser);
-	}
 	
 	@PostMapping(ApplicationConstants.AUTH_REFRESH_TOKEN)
 	public ResponseEntity<String> getRefreshToken(HttpServletRequest request) {
@@ -75,7 +46,6 @@ public class AuthController {
 			
 			String refreshToken = authorizationHeader.substring(ApplicationConstants.JWT_AUTHORIZATION_PREFIX.length());
 			String username = jwtUtils.getUsernameFromToken(refreshToken);
-//			ApplicationUser user = userRepository.findByUsername(username).get();
 			String newAccessToken = jwtUtils.generateRefreshTokenFromUsername(username, uriStr); //jwtUtils.generateAccessTokenAfterExpiration(user, uriStr);
 			
 			HttpHeaders responseHeaders = this.getHeadersWithTokens(newAccessToken, refreshToken);

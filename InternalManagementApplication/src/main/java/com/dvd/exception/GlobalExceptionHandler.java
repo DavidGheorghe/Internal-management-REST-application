@@ -80,7 +80,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
 		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.BAD_REQUEST);
 	}
-	
+
+	@ExceptionHandler(LoginFailedException.class)
+	public ResponseEntity<CustomExceptionDetails> handleLoginFailedException(LoginFailedException exception, WebRequest webRequest) {
+		CustomExceptionDetails exceptionDetails = new CustomExceptionDetails(new Date(), exception.getMessage(), webRequest.getDescription(false));
+		return new ResponseEntity<CustomExceptionDetails>(exceptionDetails, HttpStatus.FORBIDDEN);
+	}
+
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {

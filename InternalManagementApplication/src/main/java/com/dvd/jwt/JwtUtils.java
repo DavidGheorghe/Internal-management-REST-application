@@ -50,6 +50,7 @@ public class JwtUtils {
 				.withExpiresAt(expirationDate)
 				.withIssuer(requestURL)
 				.withClaim("roles", authorities)
+				.withClaim("username", username)
 				.sign(algorithm);
 		
 		return accessToken;

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -40,8 +41,11 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 		final String requestUrl = request.getRequestURL().toString();
 		String accessToken = jwtUtils.generateAccessToken(authResult, requestUrl);
 		String refreshToken = jwtUtils.generateRefreshToken(authResult, requestUrl);
-		response.setHeader("Access-Token", "Bearer " + accessToken);
-		response.setHeader("Refresh-Token ", "Bearer " + refreshToken);
+		
+		Cookie cookie = new Cookie("access-token", accessToken);
+		cookie.setMaxAge(60 * 60 * 24 * 365 * 10);
+		cookie.setPath("/");
+		response.addCookie(cookie);
 	}
 
 	@Override
